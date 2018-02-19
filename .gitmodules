@@ -1,0 +1,3 @@
+[submodule "meshcat/viewer"]
+	path = meshcat/viewer
+	url = git@github.com:rdeits/meshcat.git
