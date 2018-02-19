@@ -1,11 +1,11 @@
 from setuptools import setup
 
-setup(name="meshtv",
+setup(name="meshcat",
     version="0.0.1",
     description="Browser-based visualizer for 3D geometries and scenes",
     author="Robin Deits",
     license="MIT",
-    packages=["meshtv"],
+    packages=["meshcat"],
     install_requires=[
       "u-msgpack-python >= 2.4.1",
       "numpy >= 1.14.0",
