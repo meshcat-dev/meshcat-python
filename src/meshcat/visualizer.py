@@ -40,7 +40,7 @@ class Visualizer:
             self.core = core
         else:
             self.core = CoreVisualizer(window=window, open=open)
-        self.path = ["meshtv"]
+        self.path = ["meshcat"]
 
     @staticmethod
     def view_into(core, path):
