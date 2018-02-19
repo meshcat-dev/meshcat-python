@@ -2,8 +2,10 @@ from setuptools import setup
 
 setup(name="meshcat",
     version="0.0.1",
-    description="Browser-based visualizer for 3D geometries and scenes",
+    description="WebGL-based visualizer for 3D geometries and scenes",
+    url="https://github.com/rdeits/meshcat-python",
     author="Robin Deits",
+    author_email="mail@robindeits.com",
     license="MIT",
     packages=["meshcat"],
     install_requires=[
@@ -14,6 +16,3 @@ setup(name="meshcat",
     zip_safe=False,
     include_package_data=True
 )
-
-
-
