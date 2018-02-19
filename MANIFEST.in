@@ -1,1 +1,2 @@
-include meshcat/viewer/static/*
+graft src/meshcat/viewer
+graft src/meshcat/examples

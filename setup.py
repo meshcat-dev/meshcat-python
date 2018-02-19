@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name="meshcat",
     version="0.0.1",
@@ -8,7 +8,8 @@ setup(name="meshcat",
     author="Robin Deits",
     author_email="mail@robindeits.com",
     license="MIT",
-    packages=["meshcat"],
+    packages=find_packages("src"),
+    package_dir={"": "src"},
     install_requires=[
       "u-msgpack-python >= 2.4.1",
       "numpy >= 1.14.0",
