@@ -65,9 +65,9 @@ class Visualizer:
     def set_object(self, object):
         return self.core.send([SetObject(object, self.path)])
 
-    def set_transform(self, position=[0, 0, 0], quaternion=[0,0,0,1]):
+    def set_transform(self, matrix=np.eye(4)):
         # three.js uses xyzw quaternion format
-        return self.core.send([SetTransform(position, quaternion, self.path)])
+        return self.core.send([SetTransform(matrix, self.path)])
 
     def delete(self):
         return self.core.send([Delete(self.path)])

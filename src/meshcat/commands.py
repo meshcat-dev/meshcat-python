@@ -18,18 +18,16 @@ class SetObject:
 
 
 class SetTransform:
-    __slots__ = ["position", "quaternion", "path"]
-    def __init__(self, position, quaternion, path=[]):
-        self.position = position
-        self.quaternion = quaternion
+    __slots__ = ["matrix", "path"]
+    def __init__(self, matrix, path=[]):
+        self.matrix = matrix
         self.path = path
 
     def lower(self):
         return {
             "type": "set_transform",
             "path": self.path,
-            "position": self.position,
-            "quaternion": self.quaternion
+            "matrix": list(self.matrix.T.flatten())
         }
 
 

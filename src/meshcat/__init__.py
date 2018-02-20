@@ -4,6 +4,7 @@ from . import commands
 from . import geometry
 from . import visualizer
 from . import servers
+from . import transformations
 from .visualizer import Visualizer
 
 
