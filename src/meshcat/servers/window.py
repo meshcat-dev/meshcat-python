@@ -28,3 +28,6 @@ class ViewerWindow:
 
     def close(self):
         self.pool.close()
+
+    def __repr__(self):
+        return "<ViewerWindow at URL: {url}>".format(url=self.url())

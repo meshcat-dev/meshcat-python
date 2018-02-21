@@ -47,6 +47,22 @@ class Box(Geometry):
         }
 
 
+class Sphere(Geometry):
+    def __init__(self, radius):
+        super().__init__()
+        self.radius = radius
+
+    def lower(self, object_data):
+        return {
+            "uuid": self.uuid,
+            "type": "SphereGeometry",
+            "radius": self.radius,
+            "widthSegments" : 20,
+            "heightSegments" : 20
+        }
+
+
+
 class MeshMaterial(Material):
     def __init__(self, color=0xffffff, reflectivity=0.5, map=None, **kwargs):
         super().__init__()

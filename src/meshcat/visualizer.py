@@ -55,9 +55,13 @@ class Visualizer:
     def url(self):
         return self.core.url()
 
-    def jupyter_cell(self, height=500, width=800):
-        from IPython.display import IFrame
-        return IFrame(self.url(), height=height, width=width)
+    def jupyter_cell(self):
+        from IPython.display import HTML
+        return HTML("""
+<div style="height: 400px; width: 600px; overflow-x: auto; overflow-y: hidden; resize: both">
+<iframe src="{url}" style="width: 100%; height: 100%; border: none"></iframe>
+</div>
+""".format(url=self.url()))
 
     def __getitem__(self, path):
         return Visualizer.view_into(self.core, self.path + path.split("/"))
@@ -74,6 +78,9 @@ class Visualizer:
 
     def close(self):
         self.core.close()
+
+    def __repr__(self):
+        return "<Visualizer using: {window} at path: {path}>".format(window=self.core.window, path=self.path)
 
 
 if __name__ == '__main__':
