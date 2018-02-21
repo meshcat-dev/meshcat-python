@@ -6,6 +6,10 @@ import threading
 
 viewer_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "viewer", "static"))
 
+DEFAULT_FILESERVER_PORT = 7000
+MAX_ATTEMPTS = 1000
+
+
 # https://stackoverflow.com/a/46332163
 class ViewerFileRequestHandler(SimpleHTTPRequestHandler):
     """This handler uses server.base_path instead of always using os.getcwd()"""
@@ -19,15 +23,26 @@ class ViewerFileRequestHandler(SimpleHTTPRequestHandler):
         pass
 
 
-def start_fileserver(host="127.0.0.1", default_port=8000, max_attempts=1000):
-    # os.chdir(viewer_root)
+def find_available_port(func, default_port, max_attempts=MAX_ATTEMPTS):
     for i in range(max_attempts):
         port = default_port + i
         try:
-            httpd = socketserver.TCPServer((host, port), ViewerFileRequestHandler)
-            break
+            return func(port), port
         except OSError as e:
+            print("Port: {:d} in use, trying another...".format(port))
             pass
+    else:
+        raise(Exception("Could not find an available port in the range: [{:d}, {:d})".format(default_port, max_attempts + default_port)))
+
+
+def start_fileserver(host="127.0.0.1", port=None):
+    if port is None:
+        httpd, port = find_available_port(
+            lambda port: socketserver.TCPServer((host, port), ViewerFileRequestHandler),
+            DEFAULT_FILESERVER_PORT)
+    else:
+        httpd = socketserver.TCPServer((host, port), ViewerFileRequestHandler)
+    print("Serving files at {:s}:{:d}".format(host, port))
     return httpd, port
 
 
