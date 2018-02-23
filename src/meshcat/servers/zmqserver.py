@@ -41,9 +41,9 @@ def find_available_port(func, default_port, max_attempts=MAX_ATTEMPTS):
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
-    def __init__(self, *args, bridge=None, **kwargs):
+    def __init__(self, *args, **kwargs):
+        self.bridge = kwargs.pop("bridge")
         super(WebSocketHandler, self).__init__(*args, **kwargs)
-        self.bridge = bridge
 
     def open(self):
         self.bridge.websocket_pool.add(self)
