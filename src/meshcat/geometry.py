@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function
+
 import base64
 import uuid
 
@@ -34,7 +36,7 @@ class Image(ReferenceSceneElement):
 
 class Box(Geometry):
     def __init__(self, lengths):
-        super().__init__()
+        super(Box, self).__init__()
         self.lengths = lengths
 
     def lower(self, object_data):
@@ -49,7 +51,7 @@ class Box(Geometry):
 
 class Sphere(Geometry):
     def __init__(self, radius):
-        super().__init__()
+        super(Sphere, self).__init__()
         self.radius = radius
 
     def lower(self, object_data):
@@ -65,7 +67,7 @@ class Sphere(Geometry):
 
 class MeshMaterial(Material):
     def __init__(self, color=0xffffff, reflectivity=0.5, map=None, **kwargs):
-        super().__init__()
+        super(MeshMaterial, self).__init__()
         self.color = color
         self.reflectivity = reflectivity
         self.map = map
@@ -102,7 +104,7 @@ class MeshToonMaterial(MeshMaterial):
 
 class PngImage(Image):
     def __init__(self, data):
-        super().__init__()
+        super(PngImage, self).__init__()
         self.data = data
 
     @staticmethod
@@ -119,7 +121,7 @@ class PngImage(Image):
 
 class GenericTexture(Texture):
     def __init__(self, properties):
-        super().__init__()
+        super(GenericTexture, self).__init__()
         self.properties = properties
 
     def lower(self, object_data):
@@ -133,7 +135,7 @@ class GenericTexture(Texture):
 
 class ImageTexture(Texture):
     def __init__(self, image, wrap=[1001, 1001], repeat=[1, 1], **kwargs):
-        super().__init__()
+        super(ImageTexture, self).__init__()
         self.image = image
         self.wrap = wrap
         self.repeat = repeat
@@ -166,7 +168,7 @@ class GenericMaterial(Material):
 
 class Object(SceneElement):
     def __init__(self, geometry, material=MeshPhongMaterial()):
-        super().__init__()
+        super(Object, self).__init__()
         self.geometry = geometry
         self.material = material
 
@@ -230,7 +232,7 @@ def pack_numpy_array(x):
 
 class ObjMeshGeometry(Geometry):
     def __init__(self, contents):
-        super().__init__()
+        super(ObjMeshGeometry, self).__init__()
         self.contents = contents
 
     def lower(self, object_data):
@@ -249,7 +251,7 @@ class ObjMeshGeometry(Geometry):
 
 class PointsGeometry(Geometry):
     def __init__(self, position, color=None):
-        super().__init__()
+        super(PointsGeometry, self).__init__()
         self.position = position
         self.color = color
 
@@ -268,7 +270,7 @@ class PointsGeometry(Geometry):
 
 class PointsMaterial(Material):
     def __init__(self, size=0.001, color=0xffffff):
-        super().__init__()
+        super(PointsMaterial, self).__init__()
         self.size = size
         self.color = color
 
