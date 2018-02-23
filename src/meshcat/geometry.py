@@ -82,6 +82,10 @@ class Ellipsoid(Sphere):
         return np.diag(np.hstack((self.radii, 1.0)))
 
 
+"""
+A cylinder of the given height and radius. By Three.js convention, the axis of
+rotational symmetry is aligned with the y-axis.
+"""
 class Cylinder(Geometry):
     def __init__(self, height, radius=1.0, radiusTop=None, radiusBottom=None):
         super(Cylinder, self).__init__()
