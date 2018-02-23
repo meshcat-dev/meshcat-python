@@ -1,4 +1,6 @@
 import unittest
+import subprocess
+import sys
 import os
 
 import numpy as np
@@ -10,7 +12,19 @@ import meshcat.transformations as tf
 
 class VisualizerTest(unittest.TestCase):
     def setUp(self):
-        self.vis = meshcat.Visualizer().open()
+        self.vis = meshcat.Visualizer()
+
+        if "CI" in os.environ:
+            port = self.vis.url().split(":")[-1].split("/")[0]
+            self.proc = subprocess.Popen([sys.executable, "-m", "meshcat.tests.dummy_websocket_client", str(port)])
+        else:
+            self.vis.open()
+            self.proc = None
+
+
+    def tearDown(self):
+        if self.proc is not None:
+            self.proc.kill()
 
 
 class TestDrawing(VisualizerTest):

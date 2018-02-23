@@ -9,7 +9,7 @@ import zmq
 from .commands import ViewerMessage, SetObject, SetTransform, Delete
 
 
-class CoreVisualizer:
+class ViewerWindow:
     context = zmq.Context()
 
     def __init__(self, zmq_url, start_server, open_url):
@@ -68,27 +68,27 @@ class CoreVisualizer:
 
 
 class Visualizer:
-    __slots__ = ["core", "path"]
+    __slots__ = ["window", "path"]
 
-    def __init__(self, zmq_url=None, core=None, open=False):
-        if core is None:
-            self.core = CoreVisualizer(zmq_url=zmq_url, start_server=(zmq_url is None), open_url=open)
+    def __init__(self, zmq_url=None, window=None, open=False):
+        if window is None:
+            self.window = ViewerWindow(zmq_url=zmq_url, start_server=(zmq_url is None), open_url=open)
         else:
-            self.core = core
+            self.window = window
         self.path = ["meshcat"]
 
     @staticmethod
-    def view_into(core, path):
-        vis = Visualizer(core=core)
+    def view_into(window, path):
+        vis = Visualizer(window=window)
         vis.path = path
         return vis
 
     def open(self):
-        self.core.open()
+        self.window.open()
         return self
 
     def url(self):
-        return self.core.web_url
+        return self.window.web_url
 
     def jupyter_cell(self):
         from IPython.display import HTML
@@ -99,22 +99,22 @@ class Visualizer:
 """.format(url=self.url()))
 
     def __getitem__(self, path):
-        return Visualizer.view_into(self.core, self.path + path.split("/"))
+        return Visualizer.view_into(self.window, self.path + path.split("/"))
 
     def set_object(self, object):
-        return self.core.send([SetObject(object, self.path)])
+        return self.window.send([SetObject(object, self.path)])
 
     def set_transform(self, matrix=np.eye(4)):
-        return self.core.send([SetTransform(matrix, self.path)])
+        return self.window.send([SetTransform(matrix, self.path)])
 
     def delete(self):
-        return self.core.send([Delete(self.path)])
+        return self.window.send([Delete(self.path)])
 
     def close(self):
-        self.core.close()
+        self.window.close()
 
     def __repr__(self):
-        return "<Visualizer using: {core} at path: {path}>".format(core=self.core, path=self.path)
+        return "<Visualizer using: {window} at path: {path}>".format(window=self.window, path=self.path)
 
 
 if __name__ == '__main__':
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     else:
         zmq_url = None
 
-    core = CoreVisualizer(zmq_url, zmq_url is None, True)
+    window = ViewerWindow(zmq_url, zmq_url is None, True)
 
     while True:
         time.sleep(100)

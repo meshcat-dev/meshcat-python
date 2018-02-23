@@ -133,7 +133,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Serve the MeshCat HTML files and listen for ZeroMQ commands")
     parser.add_argument('--zmq_url', '-z', type=str, nargs="?", default=None)
     parser.add_argument('--open', '-o', action="store_true")
-    # parser.add_argument('-m', type=str, nargs="?", default=None, help="<unused>")  # Handle invocation via python -m packagename
     parser.parse_args()
 
     if len(sys.argv) > 1:
