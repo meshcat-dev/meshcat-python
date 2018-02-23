@@ -9,4 +9,10 @@ os:
   - linux
   - osx
 
+notifications:
+  email: false
+branches:
+  only:
+    - master
+
 script: pytest
