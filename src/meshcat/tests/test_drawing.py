@@ -38,7 +38,8 @@ class TestDrawing(VisualizerTest):
         # TODO: cylinder
         v["sphere"].set_object(g.Mesh(g.Sphere(0.15), g.MeshLambertMaterial(color=0xff11dd)))
         v["sphere"].set_transform(tf.translation_matrix([0, 1, 0.15]))
-        # TODO: ellipsoid
+        v["ellipsoid"].set_object(g.Ellipsoid([0.3, 0.1, 0.1]))
+        v["ellipsoid"].set_transform(tf.translation_matrix([0, 1.5, 0.1]))
 
         v = self.vis["meshes/valkyrie/head"]
         v.set_object(g.Mesh(

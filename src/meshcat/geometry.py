@@ -6,6 +6,8 @@ import uuid
 import umsgpack
 import numpy as np
 
+from . import transformations as tf
+
 
 class SceneElement(object):
     def __init__(self):
@@ -20,6 +22,9 @@ class ReferenceSceneElement(SceneElement):
 
 class Geometry(ReferenceSceneElement):
     field = "geometries"
+
+    def intrinsic_transform(self):
+        return tf.identity_matrix()
 
 
 class Material(ReferenceSceneElement):
@@ -63,6 +68,18 @@ class Sphere(Geometry):
             "heightSegments" : 20
         }
 
+
+class Ellipsoid(Sphere):
+    """
+    An Ellipsoid is treated as a Sphere of unit radius, with an affine
+    transformation applied to distort it into the ellipsoidal shape
+    """
+    def __init__(self, radii):
+        super(Ellipsoid, self).__init__(1.0)
+        self.radii = radii
+
+    def intrinsic_transform(self):
+        return np.diag(np.hstack((self.radii, 1.0)))
 
 
 class MeshMaterial(Material):
@@ -184,7 +201,8 @@ class Object(SceneElement):
                 "uuid": self.uuid,
                 "type": self._type,
                 "geometry": self.geometry.uuid,
-                "material": self.material.uuid
+                "material": self.material.uuid,
+                "matrix": list(self.geometry.intrinsic_transform().flatten())
             }
         }
         self.geometry.lower_in_object(data)
