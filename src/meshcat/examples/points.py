@@ -11,5 +11,3 @@ vis.set_object(g.Points(
     g.PointsGeometry(verts, color=verts),
     g.PointsMaterial()
 ))
-
-vis.close()

@@ -1,45 +1,80 @@
+import sys
+import subprocess
+import webbrowser
+
 import umsgpack
 import numpy as np
+import zmq
 
-from .servers.window import ViewerWindow
 from .commands import ViewerMessage, SetObject, SetTransform, Delete
 
 
 class CoreVisualizer:
-    def __init__(self, window=None, open=False):
-        if window is None:
-            window = ViewerWindow()
-        self.window = window
-        if open:
-            self.window.open()
+    context = zmq.Context()
+
+    def __init__(self, zmq_url, start_server, open_url):
+        if start_server:
+            # Need -u for unbuffered output: https://stackoverflow.com/a/25572491
+            args = [sys.executable, "-u", "-m", "meshcat.servers.zmqserver"]
+            if zmq_url is not None:
+                args.append(zmq_url)
+            print("starting subprocess")
+            self.server_proc = subprocess.Popen(args, stdout=subprocess.PIPE)
+            print("started")
+            print("waiting for zmq url")
+            self.zmq_url = self.server_proc.stdout.readline().strip().decode("utf-8")
+            print("zmq_url", self.zmq_url)
+            self.web_url = self.server_proc.stdout.readline().strip().decode("utf-8")
+            print("web_url", self.web_url)
+            # self.server_proc, (self.zmq_url, self.web_url) = create_server(zmq_url=zmq_url)
+        else:
+            self.server_proc = None
+            self.zmq_url = zmq_url
+
+        self.connect_zmq()
+
+        if not start_server:
+            self.web_url = self.request_web_url()
+
+        if open_url:
+            self.open()
         else:
             print("You can open the visualizer by visiting the following URL:")
-            print(self.window.url())
+            print(self.web_url)
+
+    def connect_zmq(self):
+        self.zmq_socket = self.context.socket(zmq.REQ)
+        self.zmq_socket.connect(self.zmq_url)
+
+    def request_web_url(self):
+        self.zmq_socket.send(b"")
+        response = self.zmq_socket.recv().decode("utf-8")
+        return response
 
     def open(self):
-        self.window.open()
+        webbrowser.open(self.web_url, new=2)
         return self
 
-    def url(self):
-        return self.window.url()
-
     def send(self, commands):
-        self.window.send(
+        self.zmq_socket.send(
             umsgpack.packb(ViewerMessage(commands).lower())
         )
+        self.zmq_socket.recv()
 
-    def close(self):
-        self.window.close()
+    def __del__(self):
+        if self.server_proc is not None:
+            print("killing proc")
+            self.server_proc.kill()
 
 
 class Visualizer:
     __slots__ = ["core", "path"]
 
-    def __init__(self, window=None, core=None, open=False):
-        if core is not None:
-            self.core = core
+    def __init__(self, zmq_url=None, core=None, open=False):
+        if core is None:
+            self.core = CoreVisualizer(zmq_url=zmq_url, start_server=(zmq_url is None), open_url=open)
         else:
-            self.core = CoreVisualizer(window=window, open=open)
+            self.core = core
         self.path = ["meshcat"]
 
     @staticmethod
@@ -53,7 +88,7 @@ class Visualizer:
         return self
 
     def url(self):
-        return self.core.url()
+        return self.core.web_url
 
     def jupyter_cell(self):
         from IPython.display import HTML
@@ -70,7 +105,6 @@ class Visualizer:
         return self.core.send([SetObject(object, self.path)])
 
     def set_transform(self, matrix=np.eye(4)):
-        # three.js uses xyzw quaternion format
         return self.core.send([SetTransform(matrix, self.path)])
 
     def delete(self):
@@ -80,71 +114,20 @@ class Visualizer:
         self.core.close()
 
     def __repr__(self):
-        return "<Visualizer using: {window} at path: {path}>".format(window=self.core.window, path=self.path)
+        return "<Visualizer using: {core} at path: {path}>".format(core=self.core, path=self.path)
 
 
 if __name__ == '__main__':
     import time
-    import random
+    import sys
 
-    from . import geometry as g
+    if len(sys.argv) > 1:
+        zmq_url = sys.argv[1]
+    else:
+        zmq_url = None
 
-    vis = Visualizer().open()
-
-    with open("../head_multisense.obj", "r") as f:
-        mesh_data = f.read()
+    core = CoreVisualizer(zmq_url, zmq_url is None, True)
 
     while True:
-        verts = np.random.random((3, 100000)).astype(np.float32)
-        vis.send([
-            SetObject(
-                g.Mesh(
-                    g.Box([0.2, 0.1, 0.2]),
-                    g.MeshLambertMaterial(0xffffff)
-                ),
-                ["primitives", "box"]
-            ),
-            SetObject(
-                g.Mesh(
-                    g.Box([0.2, 0.1, 0.2]),
-                    g.MeshLambertMaterial(color=0xffffff)
-                ),
-                []
-            ),
-            SetObject(
-                g.Points(
-                    g.PointsGeometry(verts, color=verts),
-                    g.PointsMaterial()
-                ),
-                ["primitives", "points"]
-            ),
-            SetTransform(
-                [random.random() for i in range(3)],
-                [0, 0, 0, 1],
-                ["primitives"]
-            ),
-            SetObject(
-                g.Mesh(
-                    g.ObjMeshGeometry.from_file("../head_multisense.obj"),
-                    g.MeshLambertMaterial(
-                        map=g.ImageTexture(
-                            image=g.PngImage.from_file("../HeadTextureMultisense.png")
-                        )
-                    )
-                ),
-                ["robots", "valkryie", "head"]
-            ),
-            SetTransform(
-                [0, 0, 1],
-                [0, 0, 0, 1],
-                ["robots", "valkryie", "head"]
-            )
-
-        ])
-        time.sleep(1)
-
-
-
-
-
+        time.sleep(100)
 
