@@ -7,7 +7,7 @@ import umsgpack
 import numpy as np
 
 
-class SceneElement:
+class SceneElement(object):
     def __init__(self):
         self.uuid = str(uuid.uuid1())
 
