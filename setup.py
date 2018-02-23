@@ -14,7 +14,8 @@ setup(name="meshcat",
     install_requires=[
       "u-msgpack-python >= 2.4.1",
       "numpy >= 1.14.0",
-      "tornado >= 4.0.0"
+      "tornado >= 4.0.0",
+      "pyzmq >= 17.0.0"
     ],
     zip_safe=False,
     include_package_data=True
