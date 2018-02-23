@@ -11,6 +11,11 @@ setup(name="meshcat",
     packages=find_packages("src"),
     package_dir={"": "src"},
     test_suite="meshcat",
+    entry_points={
+        "console_scripts": [
+            "meshcat-server=meshcat.servers.zmqserver:main"
+        ]
+    },
     install_requires=[
       "u-msgpack-python >= 2.4.1",
       "numpy >= 1.14.0",

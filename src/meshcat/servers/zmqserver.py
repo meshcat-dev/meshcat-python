@@ -125,8 +125,7 @@ class ZMQWebSocketBridge(object):
 #     proc.start()
 #     return proc, queue.get()
 
-
-if __name__ == '__main__':
+def main():
     import argparse
     import sys
 
@@ -143,3 +142,6 @@ if __name__ == '__main__':
     print(bridge.zmq_url)
     print(bridge.web_url)
     bridge.run()
+
+if __name__ == '__main__':
+    main()
