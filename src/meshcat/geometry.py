@@ -82,6 +82,29 @@ class Ellipsoid(Sphere):
         return np.diag(np.hstack((self.radii, 1.0)))
 
 
+class Cylinder(Geometry):
+    def __init__(self, height, radius=1.0, radiusTop=None, radiusBottom=None):
+        super(Cylinder, self).__init__()
+        if radiusTop is not None and radiusBottom is not None:
+            self.radiusTop = radiusTop
+            self.radiusBottom = radiusBottom
+        else:
+            self.radiusTop = radius
+            self.radiusBottom = radius
+        self.height = height
+        self.radialSegments = 50
+
+    def lower(self, object_data):
+        return {
+            "uuid": self.uuid,
+            "type": "CylinderGeometry",
+            "radiusTop": self.radiusTop,
+            "radiusBottom": self.radiusBottom,
+            "height": self.height,
+            "radialSegments": self.radialSegments
+        }
+
+
 class MeshMaterial(Material):
     def __init__(self, color=0xffffff, reflectivity=0.5, map=None, **kwargs):
         super(MeshMaterial, self).__init__()
