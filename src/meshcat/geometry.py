@@ -6,6 +6,8 @@ import uuid
 import umsgpack
 import numpy as np
 
+from . import transformations as tf
+
 
 class SceneElement(object):
     def __init__(self):
@@ -20,6 +22,9 @@ class ReferenceSceneElement(SceneElement):
 
 class Geometry(ReferenceSceneElement):
     field = "geometries"
+
+    def intrinsic_transform(self):
+        return tf.identity_matrix()
 
 
 class Material(ReferenceSceneElement):
@@ -63,6 +68,45 @@ class Sphere(Geometry):
             "heightSegments" : 20
         }
 
+
+class Ellipsoid(Sphere):
+    """
+    An Ellipsoid is treated as a Sphere of unit radius, with an affine
+    transformation applied to distort it into the ellipsoidal shape
+    """
+    def __init__(self, radii):
+        super(Ellipsoid, self).__init__(1.0)
+        self.radii = radii
+
+    def intrinsic_transform(self):
+        return np.diag(np.hstack((self.radii, 1.0)))
+
+
+"""
+A cylinder of the given height and radius. By Three.js convention, the axis of
+rotational symmetry is aligned with the y-axis.
+"""
+class Cylinder(Geometry):
+    def __init__(self, height, radius=1.0, radiusTop=None, radiusBottom=None):
+        super(Cylinder, self).__init__()
+        if radiusTop is not None and radiusBottom is not None:
+            self.radiusTop = radiusTop
+            self.radiusBottom = radiusBottom
+        else:
+            self.radiusTop = radius
+            self.radiusBottom = radius
+        self.height = height
+        self.radialSegments = 50
+
+    def lower(self, object_data):
+        return {
+            "uuid": self.uuid,
+            "type": "CylinderGeometry",
+            "radiusTop": self.radiusTop,
+            "radiusBottom": self.radiusBottom,
+            "height": self.height,
+            "radialSegments": self.radialSegments
+        }
 
 
 class MeshMaterial(Material):
@@ -184,7 +228,8 @@ class Object(SceneElement):
                 "uuid": self.uuid,
                 "type": self._type,
                 "geometry": self.geometry.uuid,
-                "material": self.material.uuid
+                "material": self.material.uuid,
+                "matrix": list(self.geometry.intrinsic_transform().flatten())
             }
         }
         self.geometry.lower_in_object(data)
