@@ -15,4 +15,7 @@ branches:
   only:
     - master
 
+install:
+  - pip install .
+
 script: pytest
