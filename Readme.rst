@@ -1,3 +1,9 @@
+.. image:: https://travis-ci.org/rdeits/meshcat-python.svg?branch=master
+    :target: https://travis-ci.org/rdeits/meshcat-python
+.. image:: https://codecov.io/gh/rdeits/meshcat-python/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/rdeits/meshcat-python
+
+
 Introduction
 ============
 
