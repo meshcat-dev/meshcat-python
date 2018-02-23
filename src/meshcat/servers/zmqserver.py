@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import sys
 import multiprocessing
 from collections import deque
 
@@ -33,7 +34,7 @@ def find_available_port(func, default_port, max_attempts=MAX_ATTEMPTS):
         try:
             return func(port), port
         except (OSError, zmq.error.ZMQError):
-            print("Port: {:d} in use, trying another...".format(port))
+            print("Port: {:d} in use, trying another...".format(port), file=sys.stderr)
             pass
     else:
         raise(Exception("Could not find an available port in the range: [{:d}, {:d})".format(default_port, max_attempts + default_port)))
@@ -47,14 +48,14 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         self.bridge.websocket_pool.add(self)
         self.bridge.process_pending_messages()
-        print("opened:", self)
+        print("opened:", self, file=sys.stderr)
 
     def on_message(self, message):
         pass
 
     def on_close(self):
         self.bridge.websocket_pool.remove(self)
-        print("closed:", self)
+        print("closed:", self, file=sys.stderr)
 
 
 class ZMQWebSocketBridge(object):
@@ -127,10 +128,13 @@ class ZMQWebSocketBridge(object):
 
 if __name__ == '__main__':
     import argparse
+    import sys
+
     parser = argparse.ArgumentParser(description="Serve the MeshCat HTML files and listen for ZeroMQ commands")
     parser.add_argument('--zmq_url', '-z', type=str, nargs="?", default=None)
-    parser.add_argument('--open', '-o', type=bool, action="store_true")
-    parser.parse_args(sys.argv)
+    parser.add_argument('--open', '-o', action="store_true")
+    # parser.add_argument('-m', type=str, nargs="?", default=None, help="<unused>")  # Handle invocation via python -m packagename
+    parser.parse_args()
 
     if len(sys.argv) > 1:
         zmq_url = sys.argv[1]

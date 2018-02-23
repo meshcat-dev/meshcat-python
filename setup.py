@@ -10,6 +10,7 @@ setup(name="meshcat",
     license="MIT",
     packages=find_packages("src"),
     package_dir={"": "src"},
+    test_suite="meshcat",
     install_requires=[
       "u-msgpack-python >= 2.4.1",
       "numpy >= 1.14.0",
