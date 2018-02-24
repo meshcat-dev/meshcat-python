@@ -23,6 +23,8 @@ class VisualizerTest(unittest.TestCase):
             self.vis.open()
             self.dummy_proc = None
 
+        self.vis.wait()
+
     def tearDown(self):
         if self.dummy_proc is not None:
             self.dummy_proc.kill()
@@ -79,6 +81,8 @@ class TestStandaloneServer(unittest.TestCase):
         else:
             # self.vis.open()
             self.dummy_proc = None
+
+        self.vis.wait()
 
     def runTest(self):
         v = self.vis["shapes"]

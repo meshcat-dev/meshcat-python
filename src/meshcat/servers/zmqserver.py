@@ -14,6 +14,8 @@ import zmq
 from zmq.eventloop import ioloop
 from zmq.eventloop.zmqstream import ZMQStream
 
+from .tree import SceneTree, walk, find_node
+
 # Install ZMQ ioloop instead of a tornado ioloop
 # http://zeromq.github.com/pyzmq/eventloop.html
 ioloop.install()
@@ -48,7 +50,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         self.bridge.websocket_pool.add(self)
         print("opened:", self, file=sys.stderr)
-        self.bridge.process_pending_messages()
+        self.bridge.send_scene(self)
 
     def on_message(self, message):
         pass
@@ -65,6 +67,7 @@ class ZMQWebSocketBridge(object):
         self.host = host
         self.websocket_pool = set()
         self.app = self.make_app()
+        self.ioloop = tornado.ioloop.IOLoop.current()
 
         if zmq_url is None:
             def f(port):
@@ -79,7 +82,8 @@ class ZMQWebSocketBridge(object):
             self.app.listen(port)
             self.fileserver_port = port
         self.web_url = "http://{host}:{port}/static/".format(host=self.host, port=self.fileserver_port)
-        self.pending_messages = deque()
+
+        self.tree = SceneTree()
 
     def make_app(self):
         return tornado.web.Application([
@@ -87,19 +91,45 @@ class ZMQWebSocketBridge(object):
             (r"/", WebSocketHandler, {"bridge": self})
         ])
 
-    def handle_zmq(self, msg):
-        if len(msg) == 1 and len(msg[0]) == 0:
-            self.zmq_socket.send(self.web_url.encode("utf-8"))
-        else:
-            self.pending_messages.append(msg)
-            self.process_pending_messages()
-
-    def process_pending_messages(self):
-        while len(self.websocket_pool) > 0 and len(self.pending_messages) > 0:
-            msg = self.pending_messages.popleft()
-            for websocket in self.websocket_pool:
-                websocket.write_message(msg[0], binary=True)
+    def wait_for_websockets(self):
+        if len(self.websocket_pool) > 0:
             self.zmq_socket.send(b"ok")
+        else:
+            self.ioloop.call_later(0.1, self.wait_for_websockets)
+
+    def handle_zmq(self, frames):
+        cmd = frames[0].decode("utf-8")
+        if cmd == "url":
+            self.zmq_socket.send(self.web_url.encode("utf-8"))
+        elif cmd == "wait":
+            self.ioloop.add_callback(self.wait_for_websockets)
+        elif cmd in ["set_transform", "set_object", "delete"]:
+            if len(frames) != 3:
+                self.zmq_socket.send(b"error: expected 3 frames")
+                return
+            path = frames[1].decode("utf-8").split("/")
+            data = frames[2]
+            self.forward_to_websockets(frames)
+            if cmd == "set_transform":
+                find_node(self.tree, path).transform = data
+            elif cmd == "set_object":
+                find_node(self.tree, path).object = data
+            elif cmd == "delete":
+                if len(path) > 0:
+                    parent = find_node(self.tree, path[:-1])
+                    child = path[-1]
+                    if child in parent:
+                        del parent[child]
+                else:
+                    self.tree = SceneTree()
+            self.zmq_socket.send(b"ok")
+        else:
+            self.zmq_socket.send(b"error: unrecognized comand")
+
+    def forward_to_websockets(self, frames):
+        cmd, path, data = frames
+        for websocket in self.websocket_pool:
+            websocket.write_message(data, binary=True)
 
     def setup_zmq(self, url):
         zmq_socket = self.context.socket(zmq.REP)
@@ -108,8 +138,15 @@ class ZMQWebSocketBridge(object):
         zmq_stream.on_recv(self.handle_zmq)
         return zmq_socket, zmq_stream, url
 
+    def send_scene(self, websocket):
+        for node in walk(self.tree):
+            if node.object is not None:
+                websocket.write_message(node.object, binary=True)
+            if node.transform is not None:
+                websocket.write_message(node.transform, binary=True)
+
     def run(self):
-        tornado.ioloop.IOLoop.current().start()
+        self.ioloop.start()
 
 
 def main():

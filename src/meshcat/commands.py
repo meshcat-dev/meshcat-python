@@ -50,13 +50,3 @@ class Delete:
             "type": "delete",
             "path": self.path
         }
-
-
-class ViewerMessage:
-    def __init__(self, commands):
-        self.commands = commands
-
-    def lower(self):
-        return {
-            "commands": [c.lower() for c in self.commands]
-        }

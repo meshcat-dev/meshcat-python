@@ -8,7 +8,7 @@ import umsgpack
 import numpy as np
 import zmq
 
-from .commands import ViewerMessage, SetObject, SetTransform, Delete
+from .commands import SetObject, SetTransform, Delete
 from .geometry import MeshPhongMaterial
 
 
@@ -48,7 +48,7 @@ class ViewerWindow:
         self.zmq_socket.connect(self.zmq_url)
 
     def request_web_url(self):
-        self.zmq_socket.send(b"")
+        self.zmq_socket.send(b"url")
         response = self.zmq_socket.recv().decode("utf-8")
         return response
 
@@ -56,10 +56,17 @@ class ViewerWindow:
         webbrowser.open(self.web_url, new=2)
         return self
 
-    def send(self, commands):
-        self.zmq_socket.send(
-            umsgpack.packb(ViewerMessage(commands).lower())
-        )
+    def wait(self):
+        self.zmq_socket.send(b"wait")
+        return self.zmq_socket.recv().decode("utf-8")
+
+    def send(self, command):
+        cmd_data = command.lower()
+        self.zmq_socket.send_multipart([
+            cmd_data["type"].encode("utf-8"),
+            "/".join(cmd_data["path"]).encode("utf-8"),
+            umsgpack.packb(cmd_data)
+        ])
         self.zmq_socket.recv()
 
     def __del__(self):
@@ -90,6 +97,12 @@ class Visualizer:
     def url(self):
         return self.window.web_url
 
+    def wait(self):
+        """
+        Block until a browser is connected to the server
+        """
+        return self.window.wait()
+
     def jupyter_cell(self):
         from IPython.display import HTML
         return HTML("""
@@ -102,13 +115,13 @@ class Visualizer:
         return Visualizer.view_into(self.window, self.path + path.split("/"))
 
     def set_object(self, geometry, material=None):
-        return self.window.send([SetObject(geometry, material, self.path)])
+        return self.window.send(SetObject(geometry, material, self.path))
 
     def set_transform(self, matrix=np.eye(4)):
-        return self.window.send([SetTransform(matrix, self.path)])
+        return self.window.send(SetTransform(matrix, self.path))
 
     def delete(self):
-        return self.window.send([Delete(self.path)])
+        return self.window.send(Delete(self.path))
 
     def close(self):
         self.window.close()
