@@ -1,11 +1,15 @@
+from __future__ import absolute_import, division, print_function
+
 import base64
 import uuid
 
 import umsgpack
 import numpy as np
 
+from . import transformations as tf
 
-class SceneElement:
+
+class SceneElement(object):
     def __init__(self):
         self.uuid = str(uuid.uuid1())
 
@@ -18,6 +22,9 @@ class ReferenceSceneElement(SceneElement):
 
 class Geometry(ReferenceSceneElement):
     field = "geometries"
+
+    def intrinsic_transform(self):
+        return tf.identity_matrix()
 
 
 class Material(ReferenceSceneElement):
@@ -34,7 +41,7 @@ class Image(ReferenceSceneElement):
 
 class Box(Geometry):
     def __init__(self, lengths):
-        super().__init__()
+        super(Box, self).__init__()
         self.lengths = lengths
 
     def lower(self, object_data):
@@ -49,7 +56,7 @@ class Box(Geometry):
 
 class Sphere(Geometry):
     def __init__(self, radius):
-        super().__init__()
+        super(Sphere, self).__init__()
         self.radius = radius
 
     def lower(self, object_data):
@@ -62,10 +69,49 @@ class Sphere(Geometry):
         }
 
 
+class Ellipsoid(Sphere):
+    """
+    An Ellipsoid is treated as a Sphere of unit radius, with an affine
+    transformation applied to distort it into the ellipsoidal shape
+    """
+    def __init__(self, radii):
+        super(Ellipsoid, self).__init__(1.0)
+        self.radii = radii
+
+    def intrinsic_transform(self):
+        return np.diag(np.hstack((self.radii, 1.0)))
+
+
+"""
+A cylinder of the given height and radius. By Three.js convention, the axis of
+rotational symmetry is aligned with the y-axis.
+"""
+class Cylinder(Geometry):
+    def __init__(self, height, radius=1.0, radiusTop=None, radiusBottom=None):
+        super(Cylinder, self).__init__()
+        if radiusTop is not None and radiusBottom is not None:
+            self.radiusTop = radiusTop
+            self.radiusBottom = radiusBottom
+        else:
+            self.radiusTop = radius
+            self.radiusBottom = radius
+        self.height = height
+        self.radialSegments = 50
+
+    def lower(self, object_data):
+        return {
+            "uuid": self.uuid,
+            "type": "CylinderGeometry",
+            "radiusTop": self.radiusTop,
+            "radiusBottom": self.radiusBottom,
+            "height": self.height,
+            "radialSegments": self.radialSegments
+        }
+
 
 class MeshMaterial(Material):
     def __init__(self, color=0xffffff, reflectivity=0.5, map=None, **kwargs):
-        super().__init__()
+        super(MeshMaterial, self).__init__()
         self.color = color
         self.reflectivity = reflectivity
         self.map = map
@@ -102,7 +148,7 @@ class MeshToonMaterial(MeshMaterial):
 
 class PngImage(Image):
     def __init__(self, data):
-        super().__init__()
+        super(PngImage, self).__init__()
         self.data = data
 
     @staticmethod
@@ -119,7 +165,7 @@ class PngImage(Image):
 
 class GenericTexture(Texture):
     def __init__(self, properties):
-        super().__init__()
+        super(GenericTexture, self).__init__()
         self.properties = properties
 
     def lower(self, object_data):
@@ -133,7 +179,7 @@ class GenericTexture(Texture):
 
 class ImageTexture(Texture):
     def __init__(self, image, wrap=[1001, 1001], repeat=[1, 1], **kwargs):
-        super().__init__()
+        super(ImageTexture, self).__init__()
         self.image = image
         self.wrap = wrap
         self.repeat = repeat
@@ -166,7 +212,7 @@ class GenericMaterial(Material):
 
 class Object(SceneElement):
     def __init__(self, geometry, material=MeshPhongMaterial()):
-        super().__init__()
+        super(Object, self).__init__()
         self.geometry = geometry
         self.material = material
 
@@ -182,7 +228,8 @@ class Object(SceneElement):
                 "uuid": self.uuid,
                 "type": self._type,
                 "geometry": self.geometry.uuid,
-                "material": self.material.uuid
+                "material": self.material.uuid,
+                "matrix": list(self.geometry.intrinsic_transform().flatten())
             }
         }
         self.geometry.lower_in_object(data)
@@ -230,7 +277,7 @@ def pack_numpy_array(x):
 
 class ObjMeshGeometry(Geometry):
     def __init__(self, contents):
-        super().__init__()
+        super(ObjMeshGeometry, self).__init__()
         self.contents = contents
 
     def lower(self, object_data):
@@ -249,7 +296,7 @@ class ObjMeshGeometry(Geometry):
 
 class PointsGeometry(Geometry):
     def __init__(self, position, color=None):
-        super().__init__()
+        super(PointsGeometry, self).__init__()
         self.position = position
         self.color = color
 
@@ -268,7 +315,7 @@ class PointsGeometry(Geometry):
 
 class PointsMaterial(Material):
     def __init__(self, size=0.001, color=0xffffff):
-        super().__init__()
+        super(PointsMaterial, self).__init__()
         self.size = size
         self.color = color
 

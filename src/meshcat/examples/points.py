@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function
+
 import time
 import numpy as np
 
@@ -11,5 +13,3 @@ vis.set_object(g.Points(
     g.PointsGeometry(verts, color=verts),
     g.PointsMaterial()
 ))
-
-vis.close()
