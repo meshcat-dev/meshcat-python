@@ -15,21 +15,15 @@ class ViewerWindow:
     context = zmq.Context()
 
     def __init__(self, zmq_url, start_server):
-        print("zmq_url:", zmq_url, "start_server:", start_server)
         if start_server:
             # Need -u for unbuffered output: https://stackoverflow.com/a/25572491
             args = [sys.executable, "-u", "-m", "meshcat.servers.zmqserver"]
             if zmq_url is not None:
                 args.append("--zmq-url")
                 args.append(zmq_url)
-            print("starting subprocess")
             self.server_proc = subprocess.Popen(args, stdout=subprocess.PIPE)
-            print("started")
-            print("waiting for zmq url")
             self.zmq_url = self.server_proc.stdout.readline().strip().decode("utf-8")
-            print("zmq_url", self.zmq_url)
             self.web_url = self.server_proc.stdout.readline().strip().decode("utf-8")
-            print("web_url", self.web_url)
             # self.server_proc, (self.zmq_url, self.web_url) = create_server(zmq_url=zmq_url)
         else:
             self.server_proc = None
@@ -62,16 +56,13 @@ class ViewerWindow:
         return self
 
     def send(self, commands):
-        print("sending command")
         self.zmq_socket.send(
             umsgpack.packb(ViewerMessage(commands).lower())
         )
-        print("waiting for response")
-        print(self.zmq_socket.recv().decode("utf-8"))
+        self.zmq_socket.recv()
 
     def __del__(self):
         if self.server_proc is not None:
-            print("killing proc")
             self.server_proc.kill()
 
 
@@ -80,7 +71,6 @@ class Visualizer:
 
     def __init__(self, zmq_url=None, window=None):
         if window is None:
-            print("creating window")
             self.window = ViewerWindow(zmq_url=zmq_url, start_server=(zmq_url is None))
         else:
             self.window = window
