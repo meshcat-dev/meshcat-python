@@ -18,15 +18,14 @@ class VisualizerTest(unittest.TestCase):
 
         if "CI" in os.environ:
             port = self.vis.url().split(":")[-1].split("/")[0]
-            self.proc = subprocess.Popen([sys.executable, "-m", "meshcat.tests.dummy_websocket_client", str(port)])
+            self.dummy_proc = subprocess.Popen([sys.executable, "-m", "meshcat.tests.dummy_websocket_client", str(port)])
         else:
             self.vis.open()
-            self.proc = None
-
+            self.dummy_proc = None
 
     def tearDown(self):
-        if self.proc is not None:
-            self.proc.kill()
+        if self.dummy_proc is not None:
+            self.dummy_proc.kill()
 
 
 class TestDrawing(VisualizerTest):
@@ -59,3 +58,36 @@ class TestDrawing(VisualizerTest):
         colors = verts
         v["random"].set_object(g.PointCloud(verts, colors))
         v["random"].set_transform(tf.translation_matrix([-0.5, -0.5, 0]))
+
+
+class TestStandaloneServer(unittest.TestCase):
+    def setUp(self):
+        self.zmq_url = "tcp://127.0.0.1:5560"
+        args = ["meshcat-server", "--zmq-url", self.zmq_url]
+
+        if "CI" not in os.environ:
+            args.append("--open")
+
+        self.server_proc = subprocess.Popen(args)
+        self.vis = meshcat.Visualizer(self.zmq_url)
+        # self.vis = meshcat.Visualizer()
+        # self.vis.open()
+
+        if "CI" in os.environ:
+            port = self.vis.url().split(":")[-1].split("/")[0]
+            self.dummy_proc = subprocess.Popen([sys.executable, "-m", "meshcat.tests.dummy_websocket_client", str(port)])
+        else:
+            # self.vis.open()
+            self.dummy_proc = None
+
+    def runTest(self):
+        v = self.vis["shapes"]
+        v["cube"].set_object(g.Box([0.1, 0.2, 0.3]))
+        v.set_transform(tf.translation_matrix([1., 0, 0]))
+        v.set_transform(tf.translation_matrix([1., 1., 0]))
+
+    def tearDown(self):
+        if self.dummy_proc is not None:
+            self.dummy_proc.kill()
+        self.server_proc.kill()
+
