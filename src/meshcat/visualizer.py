@@ -14,11 +14,13 @@ from .commands import ViewerMessage, SetObject, SetTransform, Delete
 class ViewerWindow:
     context = zmq.Context()
 
-    def __init__(self, zmq_url, start_server, open_url):
+    def __init__(self, zmq_url, start_server):
+        print("zmq_url:", zmq_url, "start_server:", start_server)
         if start_server:
             # Need -u for unbuffered output: https://stackoverflow.com/a/25572491
             args = [sys.executable, "-u", "-m", "meshcat.servers.zmqserver"]
             if zmq_url is not None:
+                args.append("--zmq-url")
                 args.append(zmq_url)
             print("starting subprocess")
             self.server_proc = subprocess.Popen(args, stdout=subprocess.PIPE)
@@ -37,12 +39,14 @@ class ViewerWindow:
 
         if not start_server:
             self.web_url = self.request_web_url()
+            # Not sure why this is necessary, but requesting the web URL before
+            # the websocket connection is made seems to break the receiver
+            # callback in the server until we reconnect.
+            self.connect_zmq()
 
-        if open_url:
-            self.open()
-        else:
-            print("You can open the visualizer by visiting the following URL:")
-            print(self.web_url)
+
+        print("You can open the visualizer by visiting the following URL:")
+        print(self.web_url)
 
     def connect_zmq(self):
         self.zmq_socket = self.context.socket(zmq.REQ)
@@ -58,10 +62,12 @@ class ViewerWindow:
         return self
 
     def send(self, commands):
+        print("sending command")
         self.zmq_socket.send(
             umsgpack.packb(ViewerMessage(commands).lower())
         )
-        self.zmq_socket.recv()
+        print("waiting for response")
+        print(self.zmq_socket.recv().decode("utf-8"))
 
     def __del__(self):
         if self.server_proc is not None:
@@ -72,9 +78,10 @@ class ViewerWindow:
 class Visualizer:
     __slots__ = ["window", "path"]
 
-    def __init__(self, zmq_url=None, window=None, open=False):
+    def __init__(self, zmq_url=None, window=None):
         if window is None:
-            self.window = ViewerWindow(zmq_url=zmq_url, start_server=(zmq_url is None), open_url=open)
+            print("creating window")
+            self.window = ViewerWindow(zmq_url=zmq_url, start_server=(zmq_url is None))
         else:
             self.window = window
         self.path = ["meshcat"]

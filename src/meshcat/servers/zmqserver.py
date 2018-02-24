@@ -47,8 +47,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def open(self):
         self.bridge.websocket_pool.add(self)
-        self.bridge.process_pending_messages()
         print("opened:", self, file=sys.stderr)
+        self.bridge.process_pending_messages()
 
     def on_message(self, message):
         pass
@@ -91,14 +91,11 @@ class ZMQWebSocketBridge(object):
         if len(msg) == 1 and len(msg[0]) == 0:
             self.zmq_socket.send(self.web_url.encode("utf-8"))
         else:
-            self.send_to_websockets(msg)
-
-    def send_to_websockets(self, msg):
-        self.pending_messages.append(msg)
-        self.process_pending_messages()
+            self.pending_messages.append(msg)
+            self.process_pending_messages()
 
     def process_pending_messages(self):
-        while len(self.pending_messages) > 0 and len(self.websocket_pool) > 0:
+        while len(self.websocket_pool) > 0 and len(self.pending_messages) > 0:
             msg = self.pending_messages.popleft()
             for websocket in self.websocket_pool:
                 websocket.write_message(msg[0], binary=True)
@@ -115,32 +112,21 @@ class ZMQWebSocketBridge(object):
         tornado.ioloop.IOLoop.current().start()
 
 
-# def _run_server(queue, **kwargs):
-#     queue.put((bridge.zmq_url, bridge.web_url))
-
-# def create_server(*args, **kwargs):
-#     queue = multiprocessing.Queue()
-#     proc = multiprocessing.Process(target=_run_server, args=(queue,), kwargs=kwargs)
-#     proc.daemon = True
-#     proc.start()
-#     return proc, queue.get()
-
 def main():
     import argparse
     import sys
+    import webbrowser
 
     parser = argparse.ArgumentParser(description="Serve the MeshCat HTML files and listen for ZeroMQ commands")
-    parser.add_argument('--zmq_url', '-z', type=str, nargs="?", default=None)
+    parser.add_argument('--zmq-url', '-z', type=str, nargs="?", default=None)
     parser.add_argument('--open', '-o', action="store_true")
-    parser.parse_args()
-
-    if len(sys.argv) > 1:
-        zmq_url = sys.argv[1]
-    else:
-        zmq_url = None
-    bridge = ZMQWebSocketBridge(zmq_url=zmq_url)
+    results = parser.parse_args()
+    bridge = ZMQWebSocketBridge(zmq_url=results.zmq_url)
     print(bridge.zmq_url)
     print(bridge.web_url)
+    if results.open:
+        webbrowser.open(bridge.web_url, new=2)
+
     bridge.run()
 
 if __name__ == '__main__':
