@@ -9,6 +9,7 @@ import numpy as np
 import zmq
 
 from .commands import ViewerMessage, SetObject, SetTransform, Delete
+from .geometry import MeshPhongMaterial
 
 
 class ViewerWindow:
@@ -100,8 +101,8 @@ class Visualizer:
     def __getitem__(self, path):
         return Visualizer.view_into(self.window, self.path + path.split("/"))
 
-    def set_object(self, object):
-        return self.window.send([SetObject(object, self.path)])
+    def set_object(self, geometry, material=None):
+        return self.window.send([SetObject(geometry, material, self.path)])
 
     def set_transform(self, matrix=np.eye(4)):
         return self.window.send([SetTransform(matrix, self.path)])
