@@ -52,7 +52,7 @@ Homebrew:
 	brew install zmq
 
 Usage
------
+=====
 
 For examples of interactive usage, see demo.ipynb_
 
@@ -106,7 +106,9 @@ A viewer message consists of a single ZeroMQ message containing a msgpack_ encod
 		]
 	}
 
-The format of the ``object`` field is exactly the built-in JSON serialization format from three.js (note that we use the JSON structure, but actually use msgpack for the encoding due to its much better performance). For examples of the JSON structure, see the `three.js wiki`_. 
+A single message can consist of any number of commands of any type and in any order. 
+
+The format of the ``object`` field is exactly the built-in JSON serialization format from three.js (note that we use the JSON structure, but actually use msgpack for the encoding due to its much better performance). For examples of the JSON structure, see the three.js wiki_ . 
 
 The format of the ``matrix`` in a ``set_transform`` command is a column-major homogeneous transformation matrix. 
 
