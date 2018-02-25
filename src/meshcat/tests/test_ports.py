@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 import unittest
 import os
 import subprocess
+import sys
 
 import meshcat
 import meshcat.geometry as g
