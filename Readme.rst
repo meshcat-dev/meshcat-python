@@ -171,10 +171,47 @@ The format of the ``matrix`` in a ``set_transform`` command is a column-major ho
         "path", "/slash/separated/path"
     }
 
+Examples
+--------
 
+Creating a box at path ``/meshcat/box``
+
+::
+
+    {
+        "type": "set_object",
+        "path": "/meshcat/box",
+        "object": {
+            "metadata": {"type": "Object", "version": 4.5},
+            "geometries": [{"depth": 0.5,
+                            "height": 0.5,
+                            "type": "BoxGeometry",
+                            "uuid": "fbafc3d6-18f8-11e8-b16e-f8b156fe4628",
+                            "width": 0.5}],
+            "materials": [{"color": 16777215,
+                           "reflectivity": 0.5,
+                           "type": "MeshPhongMaterial",
+                           "uuid": "e3c21698-18f8-11e8-b16e-f8b156fe4628"}],
+            "object": {"geometry": "fbafc3d6-18f8-11e8-b16e-f8b156fe4628",
+                       "material": "e3c21698-18f8-11e8-b16e-f8b156fe4628",
+                       "matrix": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+                       "type": "Mesh",
+                       "uuid": "fbafc3d7-18f8-11e8-b16e-f8b156fe4628"}},
+    }
+
+Translating that box by the vector ``[2, 3, 4]``:
+
+::
+
+    {
+        "type": "set_transform",
+        "path": "/meshcat/box",
+        "matrix": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 2.0, 3.0, 4.0, 1.0]
+    }
 
 Packing Arrays
 --------------
 
 Msgpack's default behavior is not ideal for packing large contiguous arrays (it inserts a type code before every element). For faster transfer of large pointclouds and meshes, msgpack ``Ext`` codes are available for several types of arrays. For the full list, see https://github.com/kawanet/msgpack-lite#extension-types . The ``meshcat`` Python bindings will automatically use these ``Ext`` types for ``numpy`` array inputs. 
+
 
