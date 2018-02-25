@@ -1,7 +1,11 @@
 from __future__ import absolute_import, division, print_function
 
+import sys
 import base64
 import uuid
+
+if sys.version_info >= (3, 0):
+    unicode = str
 
 import umsgpack
 import numpy as np
@@ -11,7 +15,7 @@ from . import transformations as tf
 
 class SceneElement(object):
     def __init__(self):
-        self.uuid = str(uuid.uuid1())
+        self.uuid = unicode(uuid.uuid1())
 
 
 class ReferenceSceneElement(SceneElement):
@@ -46,11 +50,11 @@ class Box(Geometry):
 
     def lower(self, object_data):
         return {
-            "uuid": self.uuid,
-            "type": "BoxGeometry",
-            "width": self.lengths[0],
-            "height": self.lengths[1],
-            "depth": self.lengths[2]
+            u"uuid": self.uuid,
+            u"type": u"BoxGeometry",
+            u"width": self.lengths[0],
+            u"height": self.lengths[1],
+            u"depth": self.lengths[2]
         }
 
 
@@ -61,11 +65,11 @@ class Sphere(Geometry):
 
     def lower(self, object_data):
         return {
-            "uuid": self.uuid,
-            "type": "SphereGeometry",
-            "radius": self.radius,
-            "widthSegments" : 20,
-            "heightSegments" : 20
+            u"uuid": self.uuid,
+            u"type": u"SphereGeometry",
+            u"radius": self.radius,
+            u"widthSegments" : 20,
+            u"heightSegments" : 20
         }
 
 
@@ -100,12 +104,12 @@ class Cylinder(Geometry):
 
     def lower(self, object_data):
         return {
-            "uuid": self.uuid,
-            "type": "CylinderGeometry",
-            "radiusTop": self.radiusTop,
-            "radiusBottom": self.radiusBottom,
-            "height": self.height,
-            "radialSegments": self.radialSegments
+            u"uuid": self.uuid,
+            u"type": u"CylinderGeometry",
+            u"radiusTop": self.radiusTop,
+            u"radiusBottom": self.radiusBottom,
+            u"height": self.height,
+            u"radialSegments": self.radialSegments
         }
 
 
@@ -119,31 +123,31 @@ class MeshMaterial(Material):
 
     def lower(self, object_data):
         data = {
-            "uuid": self.uuid,
-            "type": self._type,
-            "color": self.color,
-            "reflectivity": self.reflectivity,
+            u"uuid": self.uuid,
+            u"type": self._type,
+            u"color": self.color,
+            u"reflectivity": self.reflectivity,
         }
         data.update(self.properties)
         if self.map is not None:
-            data["map"] = self.map.lower_in_object(object_data)
+            data[u"map"] = self.map.lower_in_object(object_data)
         return data
 
 
 class MeshBasicMaterial(MeshMaterial):
-    _type="MeshBasicMaterial"
+    _type=u"MeshBasicMaterial"
 
 
 class MeshPhongMaterial(MeshMaterial):
-    _type="MeshPhongMaterial"
+    _type=u"MeshPhongMaterial"
 
 
 class MeshLambertMaterial(MeshMaterial):
-    _type="MeshLambertMaterial"
+    _type=u"MeshLambertMaterial"
 
 
 class MeshToonMaterial(MeshMaterial):
-    _type="MeshToonMaterial"
+    _type=u"MeshToonMaterial"
 
 
 class PngImage(Image):
@@ -158,8 +162,8 @@ class PngImage(Image):
 
     def lower(self, object_data):
         return {
-            "uuid": self.uuid,
-            "url": "data:image/png;base64," + base64.b64encode(self.data).decode('ascii')
+            u"uuid": self.uuid,
+            u"url": unicode("data:image/png;base64," + base64.b64encode(self.data).decode('ascii'))
         }
 
 
@@ -169,11 +173,11 @@ class GenericTexture(Texture):
         self.properties = properties
 
     def lower(self, object_data):
-        data = {"uuid": self.uuid}
+        data = {u"uuid": self.uuid}
         data.update(self.properties)
-        if "image" in data:
-            image = data["image"]
-            data["image"] = image.lower_in_object(object_data)
+        if u"image" in data:
+            image = data[u"image"]
+            data[u"image"] = image.lower_in_object(object_data)
         return data
 
 
@@ -187,10 +191,10 @@ class ImageTexture(Texture):
 
     def lower(self, object_data):
         data = {
-            "uuid": self.uuid,
-            "wrap": self.wrap,
-            "repeat": self.repeat,
-            "image": self.image.lower_in_object(object_data)
+            u"uuid": self.uuid,
+            u"wrap": self.wrap,
+            u"repeat": self.repeat,
+            u"image": self.image.lower_in_object(object_data)
         }
         data.update(self.properties)
         return data
@@ -202,11 +206,11 @@ class GenericMaterial(Material):
         self.uuid = str(uuid.uuid1())
 
     def lower(self, object_data):
-        data = {"uuid": self.uuid}
+        data = {u"uuid": self.uuid}
         data.update(self.properties)
-        if "map" in data:
-            texture = data["map"]
-            data["map"] = texture.lower_in_object(object_data)
+        if u"map" in data:
+            texture = data[u"map"]
+            data[u"map"] = texture.lower_in_object(object_data)
         return data
 
 
@@ -218,18 +222,18 @@ class Object(SceneElement):
 
     def lower(self):
         data = {
-            "metadata": {
-                "version": 4.5,
-                "type": "Object",
+            u"metadata": {
+                u"version": 4.5,
+                u"type": u"Object",
             },
-            "geometries": [],
-            "materials": [],
-            "object": {
-                "uuid": self.uuid,
-                "type": self._type,
-                "geometry": self.geometry.uuid,
-                "material": self.material.uuid,
-                "matrix": list(self.geometry.intrinsic_transform().flatten())
+            u"geometries": [],
+            u"materials": [],
+            u"object": {
+                u"uuid": self.uuid,
+                u"type": self._type,
+                u"geometry": self.geometry.uuid,
+                u"material": self.material.uuid,
+                u"matrix": list(self.geometry.intrinsic_transform().flatten())
             }
         }
         self.geometry.lower_in_object(data)
@@ -238,7 +242,7 @@ class Object(SceneElement):
 
 
 class Mesh(Object):
-    _type = "Mesh"
+    _type = u"Mesh"
 
 
 def item_size(array):
@@ -252,13 +256,13 @@ def item_size(array):
 
 def threejs_type(dtype):
     if dtype == np.uint8:
-        return "Uint8Array", 0x12
+        return u"Uint8Array", 0x12
     elif dtype == np.int32:
-        return "Int32Array", 0x15
+        return u"Int32Array", 0x15
     elif dtype == np.uint32:
-        return "Uint32Array", 0x16
+        return u"Uint32Array", 0x16
     elif dtype == np.float32:
-        return "Float32Array", 0x17
+        return u"Float32Array", 0x17
     else:
         raise ValueError("Unsupported datatype: " + str(dtype))
 
@@ -268,10 +272,10 @@ def pack_numpy_array(x):
         x = x.astype(np.float32)
     typename, extcode = threejs_type(x.dtype)
     return {
-        "itemSize": item_size(x),
-        "type": typename,
-        "array": umsgpack.Ext(extcode, x.tobytes()),
-        "normalized": False
+        u"itemSize": item_size(x),
+        u"type": typename,
+        u"array": umsgpack.Ext(extcode, x.tobytes()),
+        u"normalized": False
     }
 
 
@@ -282,10 +286,10 @@ class ObjMeshGeometry(Geometry):
 
     def lower(self, object_data):
         return {
-            "type": "_meshfile",
-            "uuid": self.uuid,
-            "format": "obj",
-            "data": self.contents
+            u"type": u"_meshfile",
+            u"uuid": self.uuid,
+            u"format": u"obj",
+            u"data": self.contents
         }
 
     @staticmethod
@@ -301,14 +305,14 @@ class PointsGeometry(Geometry):
         self.color = color
 
     def lower(self, object_data):
-        attrs = {"position": pack_numpy_array(self.position)}
+        attrs = {u"position": pack_numpy_array(self.position)}
         if self.color is not None:
-            attrs["color"] = pack_numpy_array(self.color)
+            attrs[u"color"] = pack_numpy_array(self.color)
         return {
-            "uuid": self.uuid,
-            "type": "BufferGeometry",
-            "data": {
-                "attributes": attrs
+            u"uuid": self.uuid,
+            u"type": u"BufferGeometry",
+            u"data": {
+                u"attributes": attrs
             }
         }
 
@@ -321,16 +325,16 @@ class PointsMaterial(Material):
 
     def lower(self, object_data):
         return {
-            "uuid": self.uuid,
-            "type": "PointsMaterial",
-            "color": self.color,
-            "size": self.size,
-            "vertexColors": 2
+            u"uuid": self.uuid,
+            u"type": u"PointsMaterial",
+            u"color": self.color,
+            u"size": self.size,
+            u"vertexColors": 2
         }
 
 
 class Points(Object):
-    _type = "Points"
+    _type = u"Points"
 
 
 def PointCloud(position, color, **kwargs):

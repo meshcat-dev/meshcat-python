@@ -5,6 +5,12 @@ import sys
 import multiprocessing
 from collections import deque
 
+if sys.version_info >= (3, 0):
+    ADDRESS_IN_USE_ERROR = OSError
+else:
+    import socket
+    ADDRESS_IN_USE_ERROR = socket.error
+
 import tornado.web
 import tornado.ioloop
 import tornado.websocket
@@ -35,9 +41,11 @@ def find_available_port(func, default_port, max_attempts=MAX_ATTEMPTS):
         port = default_port + i
         try:
             return func(port), port
-        except (OSError, zmq.error.ZMQError):
+        except (ADDRESS_IN_USE_ERROR, zmq.error.ZMQError):
             print("Port: {:d} in use, trying another...".format(port), file=sys.stderr)
-            pass
+        except Exception as e:
+            print(type(e))
+            raise
     else:
         raise(Exception("Could not find an available port in the range: [{:d}, {:d})".format(default_port, max_attempts + default_port)))
 
