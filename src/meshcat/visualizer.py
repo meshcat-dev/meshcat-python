@@ -64,7 +64,7 @@ class ViewerWindow:
         cmd_data = command.lower()
         self.zmq_socket.send_multipart([
             cmd_data["type"].encode("utf-8"),
-            "/".join(cmd_data["path"]).encode("utf-8"),
+            cmd_data["path"].encode("utf-8"),
             umsgpack.packb(cmd_data)
         ])
         self.zmq_socket.recv()

@@ -107,7 +107,7 @@ class ZMQWebSocketBridge(object):
             if len(frames) != 3:
                 self.zmq_socket.send(b"error: expected 3 frames")
                 return
-            path = frames[1].decode("utf-8").split("/")
+            path = list(filter(lambda x: len(x) > 0, frames[1].decode("utf-8").split("/")))
             data = frames[2]
             self.forward_to_websockets(frames)
             if cmd == "set_transform":

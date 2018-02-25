@@ -32,6 +32,7 @@ class VisualizerTest(unittest.TestCase):
 
 class TestDrawing(VisualizerTest):
     def runTest(self):
+        self.vis.delete()
         v = self.vis["shapes"]
         v.set_transform(tf.translation_matrix([1., 0, 0]))
         v["cube"].set_object(g.Box([0.1, 0.2, 0.3]))
