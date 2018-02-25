@@ -167,8 +167,8 @@ def main():
     parser.add_argument('--open', '-o', action="store_true")
     results = parser.parse_args()
     bridge = ZMQWebSocketBridge(zmq_url=results.zmq_url)
-    print(bridge.zmq_url)
-    print(bridge.web_url)
+    print("zmq_url={:s}".format(bridge.zmq_url))
+    print("web_url={:s}".format(bridge.web_url))
     if results.open:
         webbrowser.open(bridge.web_url, new=2)
 

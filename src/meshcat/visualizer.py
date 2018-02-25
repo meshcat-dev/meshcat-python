@@ -7,9 +7,24 @@ import webbrowser
 import umsgpack
 import numpy as np
 import zmq
+import re
 
 from .commands import SetObject, SetTransform, Delete
 from .geometry import MeshPhongMaterial
+
+
+def capture(pattern, s):
+    match = re.match(pattern, s)
+    if not match:
+        raise ValueError("Could not match {:s} with pattern {:s}".format(s, pattern))
+    else:
+        return match.groups()[0]
+
+def match_zmq_url(line):
+    return capture(r"^zmq_url=(.*)$", line)
+
+def match_web_url(line):
+    return capture(r"^web_url=(.*)$", line)
 
 
 class ViewerWindow:
@@ -23,9 +38,8 @@ class ViewerWindow:
                 args.append("--zmq-url")
                 args.append(zmq_url)
             self.server_proc = subprocess.Popen(args, stdout=subprocess.PIPE)
-            self.zmq_url = self.server_proc.stdout.readline().strip().decode("utf-8")
-            self.web_url = self.server_proc.stdout.readline().strip().decode("utf-8")
-            # self.server_proc, (self.zmq_url, self.web_url) = create_server(zmq_url=zmq_url)
+            self.zmq_url = match_zmq_url(self.server_proc.stdout.readline().strip().decode("utf-8"))
+            self.web_url = match_web_url(self.server_proc.stdout.readline().strip().decode("utf-8"))
         else:
             self.server_proc = None
             self.zmq_url = zmq_url
@@ -42,6 +56,8 @@ class ViewerWindow:
 
         print("You can open the visualizer by visiting the following URL:")
         print(self.web_url)
+
+
 
     def connect_zmq(self):
         self.zmq_socket = self.context.socket(zmq.REQ)
