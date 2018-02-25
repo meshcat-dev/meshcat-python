@@ -22,7 +22,7 @@ class SetObject:
         return {
             "type": "set_object",
             "object": self.object.lower(),
-            "path": self.path
+            "path": "/" + "/".join(self.path)
         }
 
 
@@ -35,7 +35,7 @@ class SetTransform:
     def lower(self):
         return {
             "type": "set_transform",
-            "path": self.path,
+            "path": "/" + "/".join(self.path),
             "matrix": list(self.matrix.T.flatten())
         }
 
@@ -48,15 +48,5 @@ class Delete:
     def lower(self):
         return {
             "type": "delete",
-            "path": self.path
-        }
-
-
-class ViewerMessage:
-    def __init__(self, commands):
-        self.commands = commands
-
-    def lower(self):
-        return {
-            "commands": [c.lower() for c in self.commands]
+            "path": "/" + "/".join(self.path)
         }
