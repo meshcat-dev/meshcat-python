@@ -58,6 +58,8 @@ For examples of interactive usage, see demo.ipynb_
 
 .. _demo.ipynb: demo.ipynb
 
+Under the Hood
+==============
 
 Starting a Server
 -----------------
@@ -104,27 +106,27 @@ All communication with the meshcat server happens over the ZMQ socket. Some comm
 |
 
 :ZMQ frames:
-    ``["set_object", "slash/separated/path", data]``
+    ``["set_object", "/slash/separated/path", data]``
 :Action:
-    Set the object at the given path (note the lack of initial "/"). ``data`` is a ``MsgPack``-encoded dictionary, described below. 
+    Set the object at the given path. ``data`` is a ``MsgPack``-encoded dictionary, described below. 
 :Response:
     "ok"
 
 |
 
 :ZMQ frames:
-    ``["set_transform", "slash/separated/path", data]``
+    ``["set_transform", "/slash/separated/path", data]``
 :Action:
-    Set the transform of the object at the given path (note the lack of an initial "/"). There does not need to be any geometry at that path yet, so ``set_transform`` and ``set_object`` can happen in any order. ``data`` is a ``MsgPack``-encoded dictionary, described below. 
+    Set the transform of the object at the given path. There does not need to be any geometry at that path yet, so ``set_transform`` and ``set_object`` can happen in any order. ``data`` is a ``MsgPack``-encoded dictionary, described below. 
 :Response:
     "ok"
 
 |
 
 :ZMQ frames:
-    ``["delete", "slash/separated/path", data]``
+    ``["delete", "/slash/separated/path", data]``
 :Action:
-    Delete the object at the given path (note the lack of an initial "/"). ``data`` is a ``MsgPack``-encoded dictionary, described below. 
+    Delete the object at the given path. ``data`` is a ``MsgPack``-encoded dictionary, described below. 
 :Response:
     "ok"
 
@@ -135,12 +137,15 @@ All communication with the meshcat server happens over the ZMQ socket. Some comm
 ::
 
     {
-        "type": "set_object",         // one of set_object, set_transform, or delete
-        "path": ["meshcat", "box1"],  // the path of the object
+        "type": "set_object",
+        "path": "/slash/separated/path",  // the path of the object
         "object": <three.js JSON>
     }
 
 The format of the ``object`` field is exactly the built-in JSON serialization format from three.js (note that we use the JSON structure, but actually use msgpack for the encoding due to its much better performance). For examples of the JSON structure, see the three.js wiki_ . 
+
+Note on redundancy
+    The ``type`` and ``path`` fields are duplicated: they are sent once in the first two ZeroMQ frames and once inside the MsgPack-encoded data. This is intentional and makes it easier for the server to handle messages without unpacking them fully. 
 
 .. _wiki: https://github.com/mrdoob/three.js/wiki/JSON-Geometry-format-4
 .. _msgpack: https://msgpack.org/index.html
@@ -151,7 +156,7 @@ The format of the ``object`` field is exactly the built-in JSON serialization fo
 
     {
         "type": "set_transform",
-        "path": ["meshcat", "box2"],
+        "path": "/slash/separated/path",
         "matrix": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
     }
 
@@ -163,7 +168,7 @@ The format of the ``matrix`` in a ``set_transform`` command is a column-major ho
 
     {
         "type": "delete",
-        "path", ["meshcat", "box3"]
+        "path", "/slash/separated/path"
     }
 
 
