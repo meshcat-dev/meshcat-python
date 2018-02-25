@@ -34,6 +34,7 @@ From source:
 ::
 
     git clone https://github.com/rdeits/meshcat-python
+    git submodule update --init --recursive
     cd meshcat-python
     python setup.py install
 
