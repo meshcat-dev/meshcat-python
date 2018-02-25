@@ -1,5 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
+import sys
+if sys.version_info >= (3, 0):
+    unicode = str
+
 from .geometry import Geometry, Object, Mesh, MeshPhongMaterial, PointsMaterial, Points
 
 class SetObject:
@@ -20,9 +24,9 @@ class SetObject:
 
     def lower(self):
         return {
-            "type": "set_object",
-            "object": self.object.lower(),
-            "path": "/" + "/".join(self.path)
+            u"type": u"set_object",
+            u"object": self.object.lower(),
+            u"path": unicode("/" + "/".join(self.path))
         }
 
 
@@ -34,9 +38,9 @@ class SetTransform:
 
     def lower(self):
         return {
-            "type": "set_transform",
-            "path": "/" + "/".join(self.path),
-            "matrix": list(self.matrix.T.flatten())
+            u"type": u"set_transform",
+            u"path": unicode("/" + "/".join(self.path)),
+            u"matrix": list(self.matrix.T.flatten())
         }
 
 
@@ -47,6 +51,6 @@ class Delete:
 
     def lower(self):
         return {
-            "type": "delete",
-            "path": "/" + "/".join(self.path)
+            u"type": u"delete",
+            u"path": unicode("/" + "/".join(self.path))
         }
