@@ -27,8 +27,8 @@ from .tree import SceneTree, walk, find_node
 ioloop.install()
 
 
-VIEWER_ROOT = os.path.join(os.path.dirname(__file__), "..", "viewer", "static")
-VIEWER_HTML = "meshcat.html"
+VIEWER_ROOT = os.path.join(os.path.dirname(__file__), "..", "viewer", "dist")
+VIEWER_HTML = "index.html"
 
 DEFAULT_FILESERVER_PORT = 7000
 MAX_ATTEMPTS = 1000
