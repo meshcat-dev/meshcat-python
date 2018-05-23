@@ -274,7 +274,7 @@ def pack_numpy_array(x):
     return {
         u"itemSize": item_size(x),
         u"type": typename,
-        u"array": umsgpack.Ext(extcode, x.tobytes()),
+        u"array": umsgpack.Ext(extcode, x.tobytes('F')),
         u"normalized": False
     }
 
@@ -342,6 +342,3 @@ def PointCloud(position, color, **kwargs):
         PointsGeometry(position, color),
         PointsMaterial(**kwargs)
     )
-
-
-
