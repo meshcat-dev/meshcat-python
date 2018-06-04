@@ -54,3 +54,23 @@ class Delete:
             u"type": u"delete",
             u"path": unicode("/" + "/".join(self.path))
         }
+
+
+class SetAnimation:
+    __slots__ = ["animation", "play", "repetitions"]
+
+    def __init__(self, animation, play=True, repetitions=1):
+        self.animation = animation
+        self.play = play
+        self.repetitions = repetitions
+
+    def lower(self):
+        return {
+            u"type": u"set_animation",
+            u"animations": self.animation.lower(),
+            u"options": {
+                u"play": self.play,
+                u"repetitions": self.repetitions
+            },
+            u"path": ""
+        }

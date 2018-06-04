@@ -35,6 +35,8 @@ MAX_ATTEMPTS = 1000
 DEFAULT_ZMQ_METHOD = "tcp"
 DEFAULT_ZMQ_PORT = 6000
 
+MESHCAT_COMMANDS = ["set_transform", "set_object", "delete", "set_property", "set_animation"]
+
 
 def find_available_port(func, default_port, max_attempts=MAX_ATTEMPTS):
     for i in range(max_attempts):
@@ -111,7 +113,7 @@ class ZMQWebSocketBridge(object):
             self.zmq_socket.send(self.web_url.encode("utf-8"))
         elif cmd == "wait":
             self.ioloop.add_callback(self.wait_for_websockets)
-        elif cmd in ["set_transform", "set_object", "delete"]:
+        elif cmd in MESHCAT_COMMANDS:
             if len(frames) != 3:
                 self.zmq_socket.send(b"error: expected 3 frames")
                 return

@@ -9,7 +9,7 @@ import numpy as np
 import zmq
 import re
 
-from .commands import SetObject, SetTransform, Delete
+from .commands import SetObject, SetTransform, Delete, SetAnimation
 from .geometry import MeshPhongMaterial
 
 
@@ -98,7 +98,7 @@ class Visualizer:
             self.window = ViewerWindow(zmq_url=zmq_url, start_server=(zmq_url is None))
         else:
             self.window = window
-        self.path = ["meshcat"]
+        self.path = ("meshcat",)
 
     @staticmethod
     def view_into(window, path):
@@ -128,13 +128,16 @@ class Visualizer:
 """.format(url=self.url()))
 
     def __getitem__(self, path):
-        return Visualizer.view_into(self.window, self.path + path.split("/"))
+        return Visualizer.view_into(self.window, self.path + tuple(path.split("/")))
 
     def set_object(self, geometry, material=None):
         return self.window.send(SetObject(geometry, material, self.path))
 
     def set_transform(self, matrix=np.eye(4)):
         return self.window.send(SetTransform(matrix, self.path))
+
+    def set_animation(self, animation, play=True, repetitions=1):
+        return self.window.send(SetAnimation(animation, play=play, repetitions=repetitions))
 
     def delete(self):
         return self.window.send(Delete(self.path))
