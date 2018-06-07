@@ -35,6 +35,8 @@ class TestDrawing(VisualizerTest):
         self.vis.delete()
         v = self.vis["shapes"]
         v.set_transform(tf.translation_matrix([1., 0, 0]))
+        v["cube"].set_object(g.Box([1.0, 0.2, 0.3]))
+        v["cube"].delete()
         v["cube"].set_object(g.Box([0.1, 0.2, 0.3]))
         v["cube"].set_transform(tf.translation_matrix([0.05, 0.1, 0.15]))
         v["cylinder"].set_object(g.Cylinder(0.2, 0.1), g.MeshLambertMaterial(color=0x22dd22))
@@ -96,3 +98,34 @@ class TestStandaloneServer(unittest.TestCase):
             self.dummy_proc.kill()
         self.server_proc.kill()
 
+
+class TestAnimation(VisualizerTest):
+    def runTest(self):
+        v = self.vis["shapes"]
+        v.set_transform(tf.translation_matrix([1., 0, 0]))
+        v["cube"].set_object(g.Box([0.1, 0.2, 0.3]))
+
+        animation = meshcat.animation.Animation()
+        with animation.at_frame(v, 0) as frame_vis:
+            frame_vis.set_transform(tf.translation_matrix([0, 0, 0]))
+        with animation.at_frame(v, 30) as frame_vis:
+            frame_vis.set_transform(tf.translation_matrix([2, 0, 0]).dot(tf.rotation_matrix(np.pi/2, [0, 0, 1])))
+        v.set_animation(animation)
+
+
+class TestCameraAnimation(VisualizerTest):
+    def runTest(self):
+        v = self.vis["shapes"]
+        v.set_transform(tf.translation_matrix([1., 0, 0]))
+        v["cube"].set_object(g.Box([0.1, 0.2, 0.3]))
+
+        animation = meshcat.animation.Animation()
+        with animation.at_frame(v, 0) as frame_vis:
+            frame_vis.set_transform(tf.translation_matrix([0, 0, 0]))
+        with animation.at_frame(v, 30) as frame_vis:
+            frame_vis.set_transform(tf.translation_matrix([2, 0, 0]).dot(tf.rotation_matrix(np.pi/2, [0, 0, 1])))
+        with animation.at_frame(v, 0) as frame_vis:
+            frame_vis["/Cameras/default/rotated/<object>"].set_property("zoom", "number", 1)
+        with animation.at_frame(v, 30) as frame_vis:
+            frame_vis["/Cameras/default/rotated/<object>"].set_property("zoom", "number", 0.5)
+        v.set_animation(animation)

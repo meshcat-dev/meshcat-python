@@ -26,7 +26,7 @@ class SetObject:
         return {
             u"type": u"set_object",
             u"object": self.object.lower(),
-            u"path": unicode("/" + "/".join(self.path))
+            u"path": self.path.lower()
         }
 
 
@@ -39,7 +39,7 @@ class SetTransform:
     def lower(self):
         return {
             u"type": u"set_transform",
-            u"path": unicode("/" + "/".join(self.path)),
+            u"path": self.path.lower(),
             u"matrix": list(self.matrix.T.flatten())
         }
 
@@ -52,5 +52,25 @@ class Delete:
     def lower(self):
         return {
             u"type": u"delete",
-            u"path": unicode("/" + "/".join(self.path))
+            u"path": self.path.lower()
+        }
+
+
+class SetAnimation:
+    __slots__ = ["animation", "play", "repetitions"]
+
+    def __init__(self, animation, play=True, repetitions=1):
+        self.animation = animation
+        self.play = play
+        self.repetitions = repetitions
+
+    def lower(self):
+        return {
+            u"type": u"set_animation",
+            u"animations": self.animation.lower(),
+            u"options": {
+                u"play": self.play,
+                u"repetitions": self.repetitions
+            },
+            u"path": ""
         }
