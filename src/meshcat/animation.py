@@ -76,7 +76,7 @@ class Animation(object):
 
     def lower(self):
         return [{
-            u"path": unicode("/" + "/".join(path)),
+            u"path": path.lower(),
             u"clip": clip.lower()
         } for (path, clip) in self.clips.items()]
 
@@ -111,8 +111,12 @@ class AnimationFrameVisualizer(object):
         clip.set_property(self.current_frame, "position", "vector3", js_position(matrix))
         clip.set_property(self.current_frame, "quaternion", "quaternion", js_quaternion(matrix))
 
+    def set_property(self, prop, jstype, value):
+        clip = self.get_clip()
+        clip.set_property(self.current_frame, prop, jstype, value)
+
     def __getitem__(self, path):
-        return AnimationFrameVisualizer(self.animation, self.path + tuple(path.split("/"), self.current_frame))
+        return AnimationFrameVisualizer(self.animation, self.path.append(path), self.current_frame)
 
     def __enter__(self):
         return self

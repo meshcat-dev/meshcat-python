@@ -9,6 +9,7 @@ import numpy as np
 import zmq
 import re
 
+from .path import Path
 from .commands import SetObject, SetTransform, Delete, SetAnimation
 from .geometry import MeshPhongMaterial
 
@@ -98,7 +99,7 @@ class Visualizer:
             self.window = ViewerWindow(zmq_url=zmq_url, start_server=(zmq_url is None))
         else:
             self.window = window
-        self.path = ("meshcat",)
+        self.path = Path(("meshcat",))
 
     @staticmethod
     def view_into(window, path):
@@ -128,7 +129,7 @@ class Visualizer:
 """.format(url=self.url()))
 
     def __getitem__(self, path):
-        return Visualizer.view_into(self.window, self.path + tuple(path.split("/")))
+        return Visualizer.view_into(self.window, self.path.append(path))
 
     def set_object(self, geometry, material=None):
         return self.window.send(SetObject(geometry, material, self.path))

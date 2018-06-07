@@ -26,7 +26,7 @@ class SetObject:
         return {
             u"type": u"set_object",
             u"object": self.object.lower(),
-            u"path": unicode("/" + "/".join(self.path))
+            u"path": self.path.lower()
         }
 
 
@@ -39,7 +39,7 @@ class SetTransform:
     def lower(self):
         return {
             u"type": u"set_transform",
-            u"path": unicode("/" + "/".join(self.path)),
+            u"path": self.path.lower(),
             u"matrix": list(self.matrix.T.flatten())
         }
 
@@ -52,7 +52,7 @@ class Delete:
     def lower(self):
         return {
             u"type": u"delete",
-            u"path": unicode("/" + "/".join(self.path))
+            u"path": self.path.lower()
         }
 
 
