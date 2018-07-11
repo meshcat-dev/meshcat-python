@@ -85,6 +85,42 @@ class Ellipsoid(Sphere):
     def intrinsic_transform(self):
         return np.diag(np.hstack((self.radii, 1.0)))
 
+class Ring(Geometry):
+    def __init__(self, innerRadius, outerRadius, thetaStart = 0, thetaLength = np.pi*2):
+        super(Ring, self).__init__()
+        self.innerRadius = innerRadius
+        self.outerRadius = outerRadius
+        self.thetaStart = thetaStart
+        self.thetaLength = thetaLength
+
+    def lower(self, object_data):
+        return {
+            u"uuid": self.uuid,
+            u"type": u"RingGeometry",
+            u"thetaSegments" : 20,
+            u"phiSegments" : 20,
+            u"innerRadius":self.innerRadius,
+            u"outerRadius":self.outerRadius,
+            u"thetaStart":self.thetaStart,
+            u"thetaLength":self.thetaLength
+        }
+
+class Circle(Geometry):
+    def __init__(self, radius, thetaStart = 0, thetaLength = np.pi*2):
+        super(Circle, self).__init__()
+        self.radius = radius
+        self.thetaStart = thetaStart
+        self.thetaLength = thetaLength
+
+    def lower(self, object_data):
+        return {
+            u"uuid": self.uuid,
+            u"type": u"CircleGeometry",
+            u"segments" : 20,
+            u"radius":self.radius,
+            u"thetaStart":self.thetaStart,
+            u"thetaLength":self.thetaLength
+        }
 
 """
 A cylinder of the given height and radius. By Three.js convention, the axis of
