@@ -57,6 +57,8 @@ class TestDrawing(VisualizerTest):
         ))
         v.set_transform(tf.translation_matrix([0, 0.5, 0.5]))
 
+        v = self.vis["meshes/convex"]
+        v.set_object(g.Mesh(g.ObjMeshGeometry.from_file(os.path.join(meshcat.viewer_assets_path(), "../tests/data/mesh_0_convex_piece_0.obj"))))
         v = self.vis["points"]
         v.set_transform(tf.translation_matrix([-1, 0, 0]))
         verts = np.random.rand(3, 100000)
