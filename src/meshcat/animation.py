@@ -35,7 +35,7 @@ class AnimationTrack(object):
     def lower(self):
         return {
             u"name": unicode("." + self.name),
-            u"type": self.jstype,
+            u"type": unicode(self.jstype),
             u"keys": [{
                 u"time": self.frames[i],
                 u"value": self.values[i]
@@ -46,7 +46,7 @@ class AnimationTrack(object):
 class AnimationClip(object):
     __slots__ = ["tracks", "fps", "name"]
 
-    def __init__(self, tracks=None, fps=30, name="default"):
+    def __init__(self, tracks=None, fps=30, name=u"default"):
         if tracks is None:
             self.tracks = {}
         else:
@@ -63,7 +63,7 @@ class AnimationClip(object):
     def lower(self):
         return {
             u"fps": self.fps,
-            u"name": self.name,
+            u"name": unicode(self.name),
             u"tracks": [t.lower() for t in self.tracks.values()]
         }
 
@@ -112,8 +112,8 @@ class AnimationFrameVisualizer(object):
 
     def set_transform(self, matrix):
         clip = self.get_clip()
-        clip.set_property(self.current_frame, "position", "vector3", js_position(matrix))
-        clip.set_property(self.current_frame, "quaternion", "quaternion", js_quaternion(matrix))
+        clip.set_property(self.current_frame, u"position", u"vector3", js_position(matrix))
+        clip.set_property(self.current_frame, u"quaternion", u"quaternion", js_quaternion(matrix))
 
     def set_property(self, prop, jstype, value):
         clip = self.get_clip()
