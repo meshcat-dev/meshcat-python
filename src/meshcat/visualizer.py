@@ -123,7 +123,7 @@ class Visualizer:
     def jupyter_cell(self):
         from IPython.display import HTML
         return HTML("""
-<div style="height: 400px; width: 600px; overflow-x: auto; overflow-y: hidden; resize: both">
+<div style="height: 400px; width: 100%; overflow-x: auto; overflow-y: hidden; resize: both">
 <iframe src="{url}" style="width: 100%; height: 100%; border: none"></iframe>
 </div>
 """.format(url=self.url()))
