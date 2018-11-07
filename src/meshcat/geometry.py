@@ -14,11 +14,13 @@ from . import transformations as tf
 
 
 class SceneElement(object):
+
     def __init__(self):
         self.uuid = unicode(uuid.uuid1())
 
 
 class ReferenceSceneElement(SceneElement):
+
     def lower_in_object(self, object_data):
         object_data.setdefault(self.field, []).append(self.lower(object_data))
         return self.uuid
@@ -44,6 +46,7 @@ class Image(ReferenceSceneElement):
 
 
 class Box(Geometry):
+
     def __init__(self, lengths):
         super(Box, self).__init__()
         self.lengths = lengths
@@ -59,6 +62,7 @@ class Box(Geometry):
 
 
 class Sphere(Geometry):
+
     def __init__(self, radius):
         super(Sphere, self).__init__()
         self.radius = radius
@@ -68,8 +72,8 @@ class Sphere(Geometry):
             u"uuid": self.uuid,
             u"type": u"SphereGeometry",
             u"radius": self.radius,
-            u"widthSegments" : 20,
-            u"heightSegments" : 20
+            u"widthSegments": 20,
+            u"heightSegments": 20
         }
 
 
@@ -78,6 +82,7 @@ class Ellipsoid(Sphere):
     An Ellipsoid is treated as a Sphere of unit radius, with an affine
     transformation applied to distort it into the ellipsoidal shape
     """
+
     def __init__(self, radii):
         super(Ellipsoid, self).__init__(1.0)
         self.radii = radii
@@ -86,11 +91,33 @@ class Ellipsoid(Sphere):
         return np.diag(np.hstack((self.radii, 1.0)))
 
 
+class Plane(Geometry):
+
+    def __init__(self, width=1, height=1, widthSegments=1, heightSegments=1):
+        super(Plane, self).__init__()
+        self.width = width
+        self.height = height
+        self.widthSegments = widthSegments
+        self.heightSegments = heightSegments
+
+    def lower(self, object_data):
+        return {
+            u"uuid": self.uuid,
+            u"type": u"PlaneGeometry",
+            u"width": self.width,
+            u"height": self.height,
+            u"widthSegments": self.widthSegments,
+            u"heightSegments": self.heightSegments,
+        }
+
 """
 A cylinder of the given height and radius. By Three.js convention, the axis of
 rotational symmetry is aligned with the y-axis.
 """
+
+
 class Cylinder(Geometry):
+
     def __init__(self, height, radius=1.0, radiusTop=None, radiusBottom=None):
         super(Cylinder, self).__init__()
         if radiusTop is not None and radiusBottom is not None:
@@ -114,11 +141,14 @@ class Cylinder(Geometry):
 
 
 class MeshMaterial(Material):
-    def __init__(self, color=0xffffff, reflectivity=0.5, map=None, **kwargs):
+
+    def __init__(self, color=0xffffff, reflectivity=0.5, map=None,
+                 transparent=False, **kwargs):
         super(MeshMaterial, self).__init__()
         self.color = color
         self.reflectivity = reflectivity
         self.map = map
+        self.transparent = transparent
         self.properties = kwargs
 
     def lower(self, object_data):
@@ -127,6 +157,7 @@ class MeshMaterial(Material):
             u"type": self._type,
             u"color": self.color,
             u"reflectivity": self.reflectivity,
+            u"transparent": self.transparent
         }
         data.update(self.properties)
         if self.map is not None:
@@ -135,22 +166,23 @@ class MeshMaterial(Material):
 
 
 class MeshBasicMaterial(MeshMaterial):
-    _type=u"MeshBasicMaterial"
+    _type = u"MeshBasicMaterial"
 
 
 class MeshPhongMaterial(MeshMaterial):
-    _type=u"MeshPhongMaterial"
+    _type = u"MeshPhongMaterial"
 
 
 class MeshLambertMaterial(MeshMaterial):
-    _type=u"MeshLambertMaterial"
+    _type = u"MeshLambertMaterial"
 
 
 class MeshToonMaterial(MeshMaterial):
-    _type=u"MeshToonMaterial"
+    _type = u"MeshToonMaterial"
 
 
 class PngImage(Image):
+
     def __init__(self, data):
         super(PngImage, self).__init__()
         self.data = data
@@ -167,7 +199,49 @@ class PngImage(Image):
         }
 
 
+class CanvasImage(Image):
+
+    def __init__(self):
+        super(CanvasImage, self).__init__()
+
+    def lower(self, object_data):
+        return {
+            u"uuid": self.uuid,
+            u"url": ""
+        }
+
+
+class TextTexture(Texture):
+
+    def __init__(self, text, font_size=96, font_face='sans-serif',
+                 width=200, height=100, position=[10, 10]):
+        super(TextTexture, self).__init__()
+        self.text = text
+        # font_size will be passed to the JS side as is; however if the 
+        # text width exceeds canvas width, font_size will be reduced.
+        self.font_size = font_size
+        self.font_face = font_face
+        self.width = width
+        self.height = height
+        self.position = position
+        self.image = CanvasImage()
+
+    def lower(self, object_data):
+        return {
+            u"uuid": self.uuid,
+            u"type": u"TextTexture",
+            u"text": unicode(self.text),
+            u"font_size": self.font_size,
+            u"font_face": self.font_face,
+            u"width": self.width,
+            u"height": self.height,
+            u"position": self.position,
+            u"image": self.image.lower_in_object(object_data)
+        }
+
+
 class GenericTexture(Texture):
+
     def __init__(self, properties):
         super(GenericTexture, self).__init__()
         self.properties = properties
@@ -182,6 +256,7 @@ class GenericTexture(Texture):
 
 
 class ImageTexture(Texture):
+
     def __init__(self, image, wrap=[1001, 1001], repeat=[1, 1], **kwargs):
         super(ImageTexture, self).__init__()
         self.image = image
@@ -201,6 +276,7 @@ class ImageTexture(Texture):
 
 
 class GenericMaterial(Material):
+
     def __init__(self, properties):
         self.properties = properties
         self.uuid = str(uuid.uuid1())
@@ -215,6 +291,7 @@ class GenericMaterial(Material):
 
 
 class Object(SceneElement):
+
     def __init__(self, geometry, material=MeshPhongMaterial()):
         super(Object, self).__init__()
         self.geometry = geometry
@@ -251,7 +328,8 @@ def item_size(array):
     elif array.ndim == 2:
         return array.shape[0]
     else:
-        raise ValueError("I can only pack 1- or 2-dimensional numpy arrays, but this one has {:d} dimensions".format(array.ndim))
+        raise ValueError(
+            "I can only pack 1- or 2-dimensional numpy arrays, but this one has {:d} dimensions".format(array.ndim))
 
 
 def threejs_type(dtype):
@@ -280,6 +358,7 @@ def pack_numpy_array(x):
 
 
 class ObjMeshGeometry(Geometry):
+
     def __init__(self, contents):
         super(ObjMeshGeometry, self).__init__()
         self.contents = contents
@@ -299,6 +378,7 @@ class ObjMeshGeometry(Geometry):
 
 
 class PointsGeometry(Geometry):
+
     def __init__(self, position, color=None):
         super(PointsGeometry, self).__init__()
         self.position = position
@@ -318,6 +398,7 @@ class PointsGeometry(Geometry):
 
 
 class PointsMaterial(Material):
+
     def __init__(self, size=0.001, color=0xffffff):
         super(PointsMaterial, self).__init__()
         self.size = size
@@ -336,6 +417,8 @@ class PointsMaterial(Material):
 class Points(Object):
     _type = u"Points"
 
+class Texts(Object):
+    _type = u"_texttexture"
 
 def PointCloud(position, color, **kwargs):
     return Points(

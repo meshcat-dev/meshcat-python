@@ -10,7 +10,7 @@ import zmq
 import re
 
 from .path import Path
-from .commands import SetObject, SetTransform, Delete, SetAnimation
+from .commands import SetObject, SetText, SetTransform, Delete, SetAnimation
 from .geometry import MeshPhongMaterial
 
 
@@ -21,8 +21,10 @@ def capture(pattern, s):
     else:
         return match.groups()[0]
 
+
 def match_zmq_url(line):
     return capture(r"^zmq_url=(.*)$", line)
+
 
 def match_web_url(line):
     return capture(r"^web_url=(.*)$", line)
@@ -54,11 +56,8 @@ class ViewerWindow:
             # callback in the server until we reconnect.
             self.connect_zmq()
 
-
         print("You can open the visualizer by visiting the following URL:")
         print(self.web_url)
-
-
 
     def connect_zmq(self):
         self.zmq_socket = self.context.socket(zmq.REQ)
@@ -137,6 +136,11 @@ class Visualizer:
     def set_transform(self, matrix=np.eye(4)):
         return self.window.send(SetTransform(matrix, self.path))
 
+    def set_text(self, text, geometry=None, plane_width=10, plane_height=5,
+       material=None,**kwargs):
+        return self.window.send(SetText(text, geometry, plane_width=plane_width,
+            plane_height=plane_height, material=material, path=self.path, **kwargs))
+
     def set_animation(self, animation, play=True, repetitions=1):
         return self.window.send(SetAnimation(animation, play=play, repetitions=repetitions))
 
@@ -163,4 +167,3 @@ if __name__ == '__main__':
 
     while True:
         time.sleep(100)
-
