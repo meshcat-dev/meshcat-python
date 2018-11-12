@@ -14,11 +14,13 @@ from . import transformations as tf
 
 
 class SceneElement(object):
+
     def __init__(self):
         self.uuid = unicode(uuid.uuid1())
 
 
 class ReferenceSceneElement(SceneElement):
+
     def lower_in_object(self, object_data):
         object_data.setdefault(self.field, []).append(self.lower(object_data))
         return self.uuid
@@ -44,6 +46,7 @@ class Image(ReferenceSceneElement):
 
 
 class Box(Geometry):
+
     def __init__(self, lengths):
         super(Box, self).__init__()
         self.lengths = lengths
@@ -59,6 +62,7 @@ class Box(Geometry):
 
 
 class Sphere(Geometry):
+
     def __init__(self, radius):
         super(Sphere, self).__init__()
         self.radius = radius
@@ -164,31 +168,23 @@ class Cylinder(Geometry):
         }
 
 
-class Text(Geometry):
+class Plane(Geometry):
 
-    def __init__(self, text, font='helvetiker', size=100, height=50,
-                 curveSegments=12, bevelEnabled=False, bevelThickness=10,
-                 bevelSize=8, bevelSegments=3):
-        super(Text, self).__init__()
-        self.text = text
-        self.font = font
-        self.size = size
+    def __init__(self, width=1, height=1, widthSegments=1, heightSegments=1):
+        super(Plane, self).__init__()
+        self.width = width
         self.height = height
-        self.curveSegments = curveSegments
-        self.bevelEnabled = bevelEnabled
-        self.bevelThickness = bevelThickness
-        self.bevelSize = bevelSize
-        self.bevelSegments = bevelSegments
+        self.widthSegments = widthSegments
+        self.heightSegments = heightSegments
 
     def lower(self, object_data):
         return {
             u"uuid": self.uuid,
-            u"type": u"TextGeometry",
-            u"text": self.text,
-            u"font": self.font,
-            u"size": self.size,
+            u"type": u"PlaneGeometry",
+            u"width": self.width,
             u"height": self.height,
-            u"curveSegments": self.curveSegments
+            u"widthSegments": self.widthSegments,
+            u"heightSegments": self.heightSegments,
         }
 
 
@@ -228,7 +224,6 @@ class MeshLambertMaterial(MeshMaterial):
 
 class MeshToonMaterial(MeshMaterial):
     _type = u"MeshToonMaterial"
-
 
 class PngImage(Image):
 
