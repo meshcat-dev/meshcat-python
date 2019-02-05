@@ -18,7 +18,10 @@ install:
   - pip install .
 
 before_script:
-  - pip install pytest pytest-cov
+  # See https://github.com/pywbem/pywbem/pull/1370/files and
+  # https://github.com/pywbem/pywbem/issues/1371 for why we need
+  # a specific old version of pytest-cov
+  - pip install pytest pytest-cov==2.5.1
 
 script:
   - pytest --cov=./
