@@ -282,23 +282,49 @@ def pack_numpy_array(x):
     }
 
 
-class ObjMeshGeometry(Geometry):
-    def __init__(self, contents):
-        super(ObjMeshGeometry, self).__init__()
+class MeshGeometry(Geometry):
+    def __init__(self, contents, mesh_format):
+        super(MeshGeometry, self).__init__()
         self.contents = contents
+        self.mesh_format = mesh_format
 
     def lower(self, object_data):
         return {
             u"type": u"_meshfile",
             u"uuid": self.uuid,
-            u"format": u"obj",
+            u"format": self.mesh_format,
             u"data": self.contents
         }
+
+
+class ObjMeshGeometry(MeshGeometry):
+    def __init__(self, contents):
+        super(ObjMeshGeometry, self, contents, u"obj").__init__()
 
     @staticmethod
     def from_file(fname):
         with open(fname, "r") as f:
-            return ObjMeshGeometry(f.read())
+            return MeshGeometry(f.read(), u"obj")
+
+
+class DaeMeshGeometry(MeshGeometry):
+    def __init__(self, contents):
+        super(DaeMeshGeometry, self, contents, u"dae").__init__()
+
+    @staticmethod
+    def from_file(fname):
+        with open(fname, "r") as f:
+            return MeshGeometry(f.read(), u"dae")
+
+
+class StlMeshGeometry(MeshGeometry):
+    def __init__(self, contents):
+        super(StlMeshGeometry, self, contents, u"stl").__init__()
+
+    @staticmethod
+    def from_file(fname):
+        with open(fname, "r") as f:
+            return MeshGeometry(f.read(), u"stl")
 
 
 class PointsGeometry(Geometry):
