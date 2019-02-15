@@ -151,7 +151,7 @@ class MeshMaterial(Material):
             u"type": self._type,
             u"color": self.color,
             u"reflectivity": self.reflectivity,
-            u"transparent": self.transparent
+            u"transparent": self.transparent,
             u"side": self.side
         }
         data.update(self.properties)
