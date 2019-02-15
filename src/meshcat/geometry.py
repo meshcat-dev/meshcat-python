@@ -109,8 +109,6 @@ class Plane(Geometry):
 A cylinder of the given height and radius. By Three.js convention, the axis of
 rotational symmetry is aligned with the y-axis.
 """
-
-
 class Cylinder(Geometry):
 
     def __init__(self, height, radius=1.0, radiusTop=None, radiusBottom=None):
@@ -137,7 +135,7 @@ class Cylinder(Geometry):
 
 class MeshMaterial(Material):
 
-    def __init__(self, color=0xffffff, reflectivity=0.5, map=None,
+    def __init__(self, color=0xffffff, reflectivity=0.5, map=None,side=2,
                  transparent=False, **kwargs):
         super(MeshMaterial, self).__init__()
         self.color = color
@@ -237,7 +235,6 @@ class TextTexture(Texture):
 
 
 class GenericTexture(Texture):
-
     def __init__(self, properties):
         super(GenericTexture, self).__init__()
         self.properties = properties

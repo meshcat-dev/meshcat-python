@@ -45,18 +45,15 @@ def find_available_port(func, default_port, max_attempts=MAX_ATTEMPTS):
         try:
             return func(port), port
         except (ADDRESS_IN_USE_ERROR, zmq.error.ZMQError):
-            print("Port: {:d} in use, trying another...".format(
-                port), file=sys.stderr)
+            print("Port: {:d} in use, trying another...".format(port), file=sys.stderr)
         except Exception as e:
             print(type(e))
             raise
     else:
-        raise(Exception("Could not find an available port in the range: [{:d}, {:d})".format(
-            default_port, max_attempts + default_port)))
+        raise(Exception("Could not find an available port in the range: [{:d}, {:d})".format(default_port, max_attempts + default_port)))
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
-
     def __init__(self, *args, **kwargs):
         self.bridge = kwargs.pop("bridge")
         super(WebSocketHandler, self).__init__(*args, **kwargs)
@@ -86,27 +83,22 @@ class ZMQWebSocketBridge(object):
         if zmq_url is None:
             def f(port):
                 return self.setup_zmq("{:s}://{:s}:{:d}".format(DEFAULT_ZMQ_METHOD, self.host, port))
-            (self.zmq_socket, self.zmq_stream,
-             self.zmq_url), _ = find_available_port(f, DEFAULT_ZMQ_PORT)
+            (self.zmq_socket, self.zmq_stream, self.zmq_url), _ = find_available_port(f, DEFAULT_ZMQ_PORT)
         else:
-            self.zmq_socket, self.zmq_stream, self.zmq_url = self.setup_zmq(
-                zmq_url)
+            self.zmq_socket, self.zmq_stream, self.zmq_url = self.setup_zmq(zmq_url)
 
         if port is None:
-            _, self.fileserver_port = find_available_port(
-                self.app.listen, DEFAULT_FILESERVER_PORT)
+            _, self.fileserver_port = find_available_port(self.app.listen, DEFAULT_FILESERVER_PORT)
         else:
             self.app.listen(port)
             self.fileserver_port = port
-        self.web_url = "http://{host}:{port}/static/".format(
-            host=self.host, port=self.fileserver_port)
+        self.web_url = "http://{host}:{port}/static/".format(host=self.host, port=self.fileserver_port)
 
         self.tree = SceneTree()
 
     def make_app(self):
         return tornado.web.Application([
-            (r"/static/(.*)", tornado.web.StaticFileHandler,
-             {"path": VIEWER_ROOT, "default_filename": VIEWER_HTML}),
+            (r"/static/(.*)", tornado.web.StaticFileHandler,{"path": VIEWER_ROOT, "default_filename": VIEWER_HTML}),
             (r"/", WebSocketHandler, {"bridge": self})
         ])
 
@@ -126,8 +118,7 @@ class ZMQWebSocketBridge(object):
             if len(frames) != 3:
                 self.zmq_socket.send(b"error: expected 3 frames")
                 return
-            path = list(filter(lambda x: len(x) > 0, frames[
-                        1].decode("utf-8").split("/")))
+            path = list(filter(lambda x: len(x) > 0, frames[1].decode("utf-8").split("/")))
             data = frames[2]
             self.forward_to_websockets(frames)
             if cmd == "set_transform":
@@ -176,8 +167,7 @@ def main():
     import sys
     import webbrowser
 
-    parser = argparse.ArgumentParser(
-        description="Serve the MeshCat HTML files and listen for ZeroMQ commands")
+    parser = argparse.ArgumentParser(description="Serve the MeshCat HTML files and listen for ZeroMQ commands")
     parser.add_argument('--zmq-url', '-z', type=str, nargs="?", default=None)
     parser.add_argument('--open', '-o', action="store_true")
     results = parser.parse_args()
