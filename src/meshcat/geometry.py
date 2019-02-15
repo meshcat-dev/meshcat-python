@@ -14,13 +14,11 @@ from . import transformations as tf
 
 
 class SceneElement(object):
-
     def __init__(self):
         self.uuid = unicode(uuid.uuid1())
 
 
 class ReferenceSceneElement(SceneElement):
-
     def lower_in_object(self, object_data):
         object_data.setdefault(self.field, []).append(self.lower(object_data))
         return self.uuid
@@ -46,7 +44,6 @@ class Image(ReferenceSceneElement):
 
 
 class Box(Geometry):
-
     def __init__(self, lengths):
         super(Box, self).__init__()
         self.lengths = lengths
@@ -62,7 +59,6 @@ class Box(Geometry):
 
 
 class Sphere(Geometry):
-
     def __init__(self, radius):
         super(Sphere, self).__init__()
         self.radius = radius
@@ -72,8 +68,8 @@ class Sphere(Geometry):
             u"uuid": self.uuid,
             u"type": u"SphereGeometry",
             u"radius": self.radius,
-            u"widthSegments": 20,
-            u"heightSegments": 20
+            u"widthSegments" : 20,
+            u"heightSegments" : 20
         }
 
 
@@ -82,7 +78,6 @@ class Ellipsoid(Sphere):
     An Ellipsoid is treated as a Sphere of unit radius, with an affine
     transformation applied to distort it into the ellipsoidal shape
     """
-
     def __init__(self, radii):
         super(Ellipsoid, self).__init__(1.0)
         self.radii = radii
@@ -166,23 +161,22 @@ class MeshMaterial(Material):
 
 
 class MeshBasicMaterial(MeshMaterial):
-    _type = u"MeshBasicMaterial"
+    _type=u"MeshBasicMaterial"
 
 
 class MeshPhongMaterial(MeshMaterial):
-    _type = u"MeshPhongMaterial"
+    _type=u"MeshPhongMaterial"
 
 
 class MeshLambertMaterial(MeshMaterial):
-    _type = u"MeshLambertMaterial"
+    _type=u"MeshLambertMaterial"
 
 
 class MeshToonMaterial(MeshMaterial):
-    _type = u"MeshToonMaterial"
+    _type=u"MeshToonMaterial"
 
 
 class PngImage(Image):
-
     def __init__(self, data):
         super(PngImage, self).__init__()
         self.data = data
@@ -256,7 +250,6 @@ class GenericTexture(Texture):
 
 
 class ImageTexture(Texture):
-
     def __init__(self, image, wrap=[1001, 1001], repeat=[1, 1], **kwargs):
         super(ImageTexture, self).__init__()
         self.image = image
@@ -276,7 +269,6 @@ class ImageTexture(Texture):
 
 
 class GenericMaterial(Material):
-
     def __init__(self, properties):
         self.properties = properties
         self.uuid = str(uuid.uuid1())
@@ -291,7 +283,6 @@ class GenericMaterial(Material):
 
 
 class Object(SceneElement):
-
     def __init__(self, geometry, material=MeshPhongMaterial()):
         super(Object, self).__init__()
         self.geometry = geometry
@@ -328,8 +319,7 @@ def item_size(array):
     elif array.ndim == 2:
         return array.shape[0]
     else:
-        raise ValueError(
-            "I can only pack 1- or 2-dimensional numpy arrays, but this one has {:d} dimensions".format(array.ndim))
+        raise ValueError("I can only pack 1- or 2-dimensional numpy arrays, but this one has {:d} dimensions".format(array.ndim))
 
 
 def threejs_type(dtype):
@@ -358,7 +348,6 @@ def pack_numpy_array(x):
 
 
 class ObjMeshGeometry(Geometry):
-
     def __init__(self, contents):
         super(ObjMeshGeometry, self).__init__()
         self.contents = contents
@@ -378,7 +367,6 @@ class ObjMeshGeometry(Geometry):
 
 
 class PointsGeometry(Geometry):
-
     def __init__(self, position, color=None):
         super(PointsGeometry, self).__init__()
         self.position = position
@@ -398,7 +386,6 @@ class PointsGeometry(Geometry):
 
 
 class PointsMaterial(Material):
-
     def __init__(self, size=0.001, color=0xffffff):
         super(PointsMaterial, self).__init__()
         self.size = size
@@ -417,8 +404,6 @@ class PointsMaterial(Material):
 class Points(Object):
     _type = u"Points"
 
-class Texts(Object):
-    _type = u"_texttexture"
 
 def PointCloud(position, color, **kwargs):
     return Points(

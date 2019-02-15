@@ -21,10 +21,8 @@ def capture(pattern, s):
     else:
         return match.groups()[0]
 
-
 def match_zmq_url(line):
     return capture(r"^zmq_url=(.*)$", line)
-
 
 def match_web_url(line):
     return capture(r"^web_url=(.*)$", line)
@@ -56,8 +54,11 @@ class ViewerWindow:
             # callback in the server until we reconnect.
             self.connect_zmq()
 
+
         print("You can open the visualizer by visiting the following URL:")
         print(self.web_url)
+
+
 
     def connect_zmq(self):
         self.zmq_socket = self.context.socket(zmq.REQ)
@@ -167,3 +168,4 @@ if __name__ == '__main__':
 
     while True:
         time.sleep(100)
+
