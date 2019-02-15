@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+import atexit
 import sys
 import subprocess
 import webbrowser
@@ -41,6 +42,13 @@ class ViewerWindow:
             self.server_proc = subprocess.Popen(args, stdout=subprocess.PIPE)
             self.zmq_url = match_zmq_url(self.server_proc.stdout.readline().strip().decode("utf-8"))
             self.web_url = match_web_url(self.server_proc.stdout.readline().strip().decode("utf-8"))
+
+            def cleanup():
+                self.server_proc.kill()
+                self.server_proc.wait()
+
+            atexit.register(cleanup)
+
         else:
             self.server_proc = None
             self.zmq_url = zmq_url
@@ -53,7 +61,6 @@ class ViewerWindow:
             # the websocket connection is made seems to break the receiver
             # callback in the server until we reconnect.
             self.connect_zmq()
-
 
         print("You can open the visualizer by visiting the following URL:")
         print(self.web_url)
@@ -85,10 +92,6 @@ class ViewerWindow:
             umsgpack.packb(cmd_data)
         ])
         self.zmq_socket.recv()
-
-    def __del__(self):
-        if self.server_proc is not None:
-            self.server_proc.kill()
 
 
 class Visualizer:

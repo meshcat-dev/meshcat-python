@@ -145,6 +145,7 @@ class MeshMaterial(Material):
         self.map = map
         self.transparent = transparent
         self.properties = kwargs
+        self.side = side
 
     def lower(self, object_data):
         data = {
@@ -153,6 +154,7 @@ class MeshMaterial(Material):
             u"color": self.color,
             u"reflectivity": self.reflectivity,
             u"transparent": self.transparent
+            u"side": self.side
         }
         data.update(self.properties)
         if self.map is not None:
