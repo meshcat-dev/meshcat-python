@@ -115,13 +115,15 @@ class Cylinder(Geometry):
 
 class MeshMaterial(Material):
     def __init__(self, color=0xffffff, reflectivity=0.5, map=None,
-                 side = 2, **kwargs):
+                 side = 2, transparent = False, opacity = 1.0, **kwargs):
         super(MeshMaterial, self).__init__()
         self.color = color
         self.reflectivity = reflectivity
         self.map = map
         self.properties = kwargs
         self.side = side
+        self.transparent = False
+        self.opacity = 1.0
 
     def lower(self, object_data):
         data = {
@@ -129,7 +131,9 @@ class MeshMaterial(Material):
             u"type": self._type,
             u"color": self.color,
             u"reflectivity": self.reflectivity,
-            u"side": self.side
+            u"side": self.side,
+            u"transparent": self.transparent,
+            u"opacity": self.opacity
         }
         data.update(self.properties)
         if self.map is not None:
