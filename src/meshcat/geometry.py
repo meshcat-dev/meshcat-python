@@ -323,8 +323,11 @@ class StlMeshGeometry(MeshGeometry):
 
     @staticmethod
     def from_file(fname):
-        with open(fname, "r") as f:
-            return MeshGeometry(f.read(), u"stl")
+        with open(fname, "rb") as f:
+            arr = np.frombuffer(f.read(), dtype=np.uint8)
+            _, extcode = threejs_type(np.uint8)
+            encoded = umsgpack.Ext(extcode, arr.tobytes())
+            return MeshGeometry(encoded, u"stl")
 
 
 class PointsGeometry(Geometry):
