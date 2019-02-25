@@ -115,24 +115,34 @@ class Cylinder(Geometry):
 
 class MeshMaterial(Material):
     def __init__(self, color=0xffffff, reflectivity=0.5, map=None,
-                 side = 2, transparent = False, opacity = 1.0, **kwargs):
+                 side = 2, transparent = None, opacity = 1.0, **kwargs):
         super(MeshMaterial, self).__init__()
         self.color = color
         self.reflectivity = reflectivity
         self.map = map
         self.properties = kwargs
         self.side = side
-        self.transparent = False
-        self.opacity = 1.0
+        self.transparent = transparent
+        self.opacity = opacity
 
     def lower(self, object_data):
+        # Three.js allows a material to have an opacity which is != 1,
+        # but to still be non-transparent, in which case the opacity only
+        # serves to desaturate the material's color. That's a pretty odd
+        # combination of things to want, so by default we juse use the
+        # opacity value to decide whether to set transparent to True or
+        # False.
+        if self.transparent is None:
+            transparent = self.opacity != 1
+        else:
+            transparent = self.transparent
         data = {
             u"uuid": self.uuid,
             u"type": self._type,
             u"color": self.color,
             u"reflectivity": self.reflectivity,
             u"side": self.side,
-            u"transparent": self.transparent,
+            u"transparent": transparent
             u"opacity": self.opacity
         }
         data.update(self.properties)
