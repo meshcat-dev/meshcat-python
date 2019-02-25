@@ -58,7 +58,15 @@ class TestDrawing(VisualizerTest):
         v.set_transform(tf.translation_matrix([0, 0.5, 0.5]))
 
         v = self.vis["meshes/convex"]
-        v.set_object(g.Mesh(g.ObjMeshGeometry.from_file(os.path.join(meshcat.viewer_assets_path(), "../tests/data/mesh_0_convex_piece_0.obj"))))
+        v["obj"].set_object(g.Mesh(g.ObjMeshGeometry.from_file(os.path.join(meshcat.viewer_assets_path(), "../tests/data/mesh_0_convex_piece_0.obj"))))
+        v["stl_ascii"].set_object(g.Mesh(g.StlMeshGeometry.from_file(os.path.join(meshcat.viewer_assets_path(), "../tests/data/mesh_0_convex_piece_0.stl_ascii"))))
+        v["stl_ascii"].set_transform(tf.translation_matrix([0, -0.5, 0]))
+        v["stl_binary"].set_object(g.Mesh(g.StlMeshGeometry.from_file(os.path.join(meshcat.viewer_assets_path(), "../tests/data/mesh_0_convex_piece_0.stl_binary"))))
+        v["stl_binary"].set_transform(tf.translation_matrix([0, -1, 0]))
+        v["dae"].set_object(g.Mesh(g.DaeMeshGeometry.from_file(os.path.join(meshcat.viewer_assets_path(), "../tests/data/mesh_0_convex_piece_0.dae"))))
+        v["dae"].set_transform(tf.translation_matrix([0, -1.5, 0]))
+
+
         v = self.vis["points"]
         v.set_transform(tf.translation_matrix([-1, 0, 0]))
         verts = np.random.rand(3, 100000)
