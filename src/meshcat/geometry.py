@@ -134,9 +134,8 @@ class Cylinder(Geometry):
 
 
 class MeshMaterial(Material):
-
-    def __init__(self, color=0xffffff, reflectivity=0.5, map=None,side=2,
-                 transparent=False, **kwargs):
+    def __init__(self, color=0xffffff, reflectivity=0.5, map=None,
+                 side = 2, transparent = None, opacity = 1.0, **kwargs):
         super(MeshMaterial, self).__init__()
         self.color = color
         self.reflectivity = reflectivity
@@ -144,15 +143,28 @@ class MeshMaterial(Material):
         self.transparent = transparent
         self.properties = kwargs
         self.side = side
+        self.transparent = transparent
+        self.opacity = opacity
 
     def lower(self, object_data):
+        # Three.js allows a material to have an opacity which is != 1,
+        # but to still be non-transparent, in which case the opacity only
+        # serves to desaturate the material's color. That's a pretty odd
+        # combination of things to want, so by default we juse use the
+        # opacity value to decide whether to set transparent to True or
+        # False.
+        if self.transparent is None:
+            transparent = self.opacity != 1
+        else:
+            transparent = self.transparent
         data = {
             u"uuid": self.uuid,
             u"type": self._type,
             u"color": self.color,
             u"reflectivity": self.reflectivity,
+            u"side": self.side,
             u"transparent": self.transparent,
-            u"side": self.side
+            u"opacity": self.opacity
         }
         data.update(self.properties)
         if self.map is not None:
@@ -345,23 +357,52 @@ def pack_numpy_array(x):
     }
 
 
-class ObjMeshGeometry(Geometry):
-    def __init__(self, contents):
-        super(ObjMeshGeometry, self).__init__()
+class MeshGeometry(Geometry):
+    def __init__(self, contents, mesh_format):
+        super(MeshGeometry, self).__init__()
         self.contents = contents
+        self.mesh_format = mesh_format
 
     def lower(self, object_data):
         return {
             u"type": u"_meshfile",
             u"uuid": self.uuid,
-            u"format": u"obj",
+            u"format": self.mesh_format,
             u"data": self.contents
         }
+
+
+class ObjMeshGeometry(MeshGeometry):
+    def __init__(self, contents):
+        super(ObjMeshGeometry, self, contents, u"obj").__init__()
 
     @staticmethod
     def from_file(fname):
         with open(fname, "r") as f:
-            return ObjMeshGeometry(f.read())
+            return MeshGeometry(f.read(), u"obj")
+
+
+class DaeMeshGeometry(MeshGeometry):
+    def __init__(self, contents):
+        super(DaeMeshGeometry, self, contents, u"dae").__init__()
+
+    @staticmethod
+    def from_file(fname):
+        with open(fname, "r") as f:
+            return MeshGeometry(f.read(), u"dae")
+
+
+class StlMeshGeometry(MeshGeometry):
+    def __init__(self, contents):
+        super(StlMeshGeometry, self, contents, u"stl").__init__()
+
+    @staticmethod
+    def from_file(fname):
+        with open(fname, "rb") as f:
+            arr = np.frombuffer(f.read(), dtype=np.uint8)
+            _, extcode = threejs_type(np.uint8)
+            encoded = umsgpack.Ext(extcode, arr.tobytes())
+            return MeshGeometry(encoded, u"stl")
 
 
 class PointsGeometry(Geometry):
