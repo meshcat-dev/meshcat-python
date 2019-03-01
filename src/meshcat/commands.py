@@ -10,7 +10,7 @@ MeshPhongMaterial, PointsMaterial, Points, TextTexture)
 class SetObject:
     __slots__ = ["object", "path"]
 
-    def __init__(self, geometry_or_object, material=None, path=[]):
+    def __init__(self, geometry_or_object, material=None, texts=None, path=[]):
         if isinstance(geometry_or_object, Object):
             if material is not None:
                 raise(ArgumentError(
@@ -22,6 +22,9 @@ class SetObject:
             if isinstance(material, PointsMaterial):
                 self.object = Points(geometry_or_object, material)
             else:
+                if texts is not None:
+                    material.map = TextTexture(texts)
+                    material.needsUpdate = True
                 self.object = Mesh(geometry_or_object, material)
         self.path = path
 
@@ -31,43 +34,6 @@ class SetObject:
             u"object": self.object.lower(),
             u"path": self.path.lower()
         }
-
-
-class SetText:
-    __slots__ = ["object", "path"]
-
-    def __init__(self, text, geometry_or_object, plane_width=10,
-        plane_height=5, material=None, path=[], **kwargs):
-        self.text_texture = TextTexture(text, **kwargs)
-        if isinstance(geometry_or_object, Object):
-            if material is not None:
-                raise(ArgumentError(
-                    "Please supply either an Object OR a Geometry and a Material"))
-            self.object = geometry_or_object
-        else:
-            if geometry_or_object is None:
-                geometry_or_object = Plane(width=plane_width, height=plane_height)
-                # if writing onto the scene, default material is transparent
-                material = MeshPhongMaterial(map=self.text_texture,
-                                             needsUpdate=True, transparent=True)
-            if material is None:
-                material = MeshPhongMaterial(map=self.text_texture,
-                                             needsUpdate=True)
-            if isinstance(material, PointsMaterial):
-                raise(ArgumentError(
-                    "Cannot write text onto points; please supply a mesh material"))
-            else:
-                self.object = Mesh(geometry_or_object, material)
-        self.path = path
-
-    def lower(self):
-        data = {
-            u"type": u"set_text",
-            u"object": self.object.lower(),
-            u"path": self.path.lower()
-        }
-        self.text_texture.lower_in_object(data)
-        return data
 
 
 class SetTransform:

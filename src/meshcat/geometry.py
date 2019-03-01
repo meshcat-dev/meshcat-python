@@ -193,46 +193,45 @@ class PngImage(Image):
         }
 
 
-class CanvasImage(Image):
+# class CanvasImage(Image):
 
-    def __init__(self):
-        super(CanvasImage, self).__init__()
+#     def __init__(self):
+#         super(CanvasImage, self).__init__()
 
-    def lower(self, object_data):
-        return {
-            u"uuid": self.uuid,
-            u"url": ""
-        }
+#     def lower(self, object_data):
+#         return {
+#             u"uuid": self.uuid,
+#             u"url": ""
+#         }
 
 
 class TextTexture(Texture):
 
-    def __init__(self, text, font_size=96, font_face='sans-serif',
+    def __init__(self, text, font_size=100, font_face='sans-serif',
                  width=200, height=100, position=[10, 10]):
         super(TextTexture, self).__init__()
         self.text = text
-        # font_size will be passed to the JS side as is; however if the 
+        # font_size will be passed to the JS side as is; however if the
         # text width exceeds canvas width, font_size will be reduced.
         self.font_size = font_size
         self.font_face = font_face
-        self.width = width
-        self.height = height
-        self.position = position
-        self.image = CanvasImage()
+        # self.width = width
+        # self.height = height
+        # self.position = position
+        # self.image = CanvasImage()
 
     def lower(self, object_data):
         return {
             u"uuid": self.uuid,
-            u"type": u"TextTexture",
+            u"type": u"_text",
             u"text": unicode(self.text),
             u"font_size": self.font_size,
             u"font_face": self.font_face,
-            u"width": self.width,
-            u"height": self.height,
-            u"position": self.position,
-            u"image": self.image.lower_in_object(object_data)
+            # u"width": self.width,
+            # u"height": self.height,
+            # u"position": self.position,
+            # u"image": self.image.lower_in_object(object_data)
         }
-
 
 class GenericTexture(Texture):
     def __init__(self, properties):
@@ -409,3 +408,16 @@ def PointCloud(position, color, **kwargs):
         PointsGeometry(position, color),
         PointsMaterial(**kwargs)
     )
+
+
+def SceneText(text, **kwargs):
+    if 'width' in kwargs and 'height' in kwargs:
+        plane = Plane(kwargs.pop('width'), kwargs.pop('height'))
+    else:
+        plane = Plane(width=10,height=10)
+    return Mesh(
+        plane,
+        MeshPhongMaterial(map=TextTexture(text,**kwargs),transparent=True,
+            needsUpdate=True)
+        )
+

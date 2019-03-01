@@ -35,8 +35,8 @@ MAX_ATTEMPTS = 1000
 DEFAULT_ZMQ_METHOD = "tcp"
 DEFAULT_ZMQ_PORT = 6000
 
-MESHCAT_COMMANDS = ["set_transform", "set_object",
-                    "set_text", "delete", "set_property", "set_animation"]
+MESHCAT_COMMANDS = ["set_transform", "set_object", "delete", "set_property",
+"set_animation"]
 
 
 def find_available_port(func, default_port, max_attempts=MAX_ATTEMPTS):
@@ -124,8 +124,6 @@ class ZMQWebSocketBridge(object):
             if cmd == "set_transform":
                 find_node(self.tree, path).transform = data
             elif cmd == "set_object":
-                find_node(self.tree, path).object = data
-            elif cmd == "set_text":
                 find_node(self.tree, path).object = data
             elif cmd == "delete":
                 if len(path) > 0:

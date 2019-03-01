@@ -134,16 +134,12 @@ class Visualizer:
     def __getitem__(self, path):
         return Visualizer.view_into(self.window, self.path.append(path))
 
-    def set_object(self, geometry, material=None):
-        return self.window.send(SetObject(geometry, material, self.path))
+    def set_object(self, geometry, material=None, texts=None):
+        return self.window.send(SetObject(geometry, material, texts,
+           self.path))
 
     def set_transform(self, matrix=np.eye(4)):
         return self.window.send(SetTransform(matrix, self.path))
-
-    def set_text(self, text, geometry=None, plane_width=10, plane_height=5,
-       material=None,**kwargs):
-        return self.window.send(SetText(text, geometry, plane_width=plane_width,
-            plane_height=plane_height, material=material, path=self.path, **kwargs))
 
     def set_animation(self, animation, play=True, repetitions=1):
         return self.window.send(SetAnimation(animation, play=play, repetitions=repetitions))
