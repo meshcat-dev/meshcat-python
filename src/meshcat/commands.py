@@ -12,8 +12,7 @@ class SetObject:
     def __init__(self, geometry_or_object, material=None, texts=None, path=[]):
         if isinstance(geometry_or_object, Object):
             if material is not None:
-                raise(ArgumentError(
-                    "Please supply either an Object OR a Geometry and a Material"))
+                raise(ArgumentError("Please supply either an Object OR a Geometry and a Material"))
             self.object = geometry_or_object
         else:
             if material is None:
