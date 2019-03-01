@@ -11,7 +11,7 @@ import zmq
 import re
 
 from .path import Path
-from .commands import SetObject, SetText, SetTransform, Delete, SetAnimation
+from .commands import SetObject, SetTransform, Delete, SetAnimation
 from .geometry import MeshPhongMaterial
 
 

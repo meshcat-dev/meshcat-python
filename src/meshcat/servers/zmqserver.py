@@ -35,8 +35,7 @@ MAX_ATTEMPTS = 1000
 DEFAULT_ZMQ_METHOD = "tcp"
 DEFAULT_ZMQ_PORT = 6000
 
-MESHCAT_COMMANDS = ["set_transform", "set_object", "delete", "set_property",
-"set_animation"]
+MESHCAT_COMMANDS = ["set_transform", "set_object", "delete", "set_property", "set_animation"]
 
 
 def find_available_port(func, default_port, max_attempts=MAX_ATTEMPTS):
@@ -98,7 +97,7 @@ class ZMQWebSocketBridge(object):
 
     def make_app(self):
         return tornado.web.Application([
-            (r"/static/(.*)", tornado.web.StaticFileHandler,{"path": VIEWER_ROOT, "default_filename": VIEWER_HTML}),
+            (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": VIEWER_ROOT, "default_filename": VIEWER_HTML}),
             (r"/", WebSocketHandler, {"bridge": self})
         ])
 

@@ -9,7 +9,6 @@ MeshPhongMaterial, PointsMaterial, Points, TextTexture)
 
 class SetObject:
     __slots__ = ["object", "path"]
-
     def __init__(self, geometry_or_object, material=None, texts=None, path=[]):
         if isinstance(geometry_or_object, Object):
             if material is not None:
@@ -38,7 +37,6 @@ class SetObject:
 
 class SetTransform:
     __slots__ = ["matrix", "path"]
-
     def __init__(self, matrix, path=[]):
         self.matrix = matrix
         self.path = path
@@ -53,7 +51,6 @@ class SetTransform:
 
 class Delete:
     __slots__ = ["path"]
-
     def __init__(self, path):
         self.path = path
 

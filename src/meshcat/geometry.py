@@ -205,18 +205,6 @@ class PngImage(Image):
         }
 
 
-# class CanvasImage(Image):
-
-#     def __init__(self):
-#         super(CanvasImage, self).__init__()
-
-#     def lower(self, object_data):
-#         return {
-#             u"uuid": self.uuid,
-#             u"url": ""
-#         }
-
-
 class TextTexture(Texture):
 
     def __init__(self, text, font_size=100, font_face='sans-serif',
@@ -227,10 +215,6 @@ class TextTexture(Texture):
         # text width exceeds canvas width, font_size will be reduced.
         self.font_size = font_size
         self.font_face = font_face
-        # self.width = width
-        # self.height = height
-        # self.position = position
-        # self.image = CanvasImage()
 
     def lower(self, object_data):
         return {
@@ -239,10 +223,6 @@ class TextTexture(Texture):
             u"text": unicode(self.text),
             u"font_size": self.font_size,
             u"font_face": self.font_face,
-            # u"width": self.width,
-            # u"height": self.height,
-            # u"position": self.position,
-            # u"image": self.image.lower_in_object(object_data)
         }
 
 class GenericTexture(Texture):
