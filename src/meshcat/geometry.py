@@ -6,6 +6,11 @@ import uuid
 
 if sys.version_info >= (3, 0):
     unicode = str
+    from io import StringIO, BytesIO
+else:
+    from StringIO import StringIO
+    BytesIO = StringIO
+
 
 import umsgpack
 import numpy as np
@@ -296,6 +301,19 @@ def pack_numpy_array(x):
     }
 
 
+def data_from_stream(stream):
+    if sys.version_info >= (3, 0):
+        if type(stream) == BytesIO:
+            data = stream.read().decode(encoding='utf-8')
+        elif type(stream) == StringIO:
+            data = stream.read()
+        else:
+            raise ValueError('Stream must be StringIO or BytesIO, not {}'.format(type(stream)))
+    else:
+        data = stream.read()
+    return data
+
+
 class MeshGeometry(Geometry):
     def __init__(self, contents, mesh_format):
         super(MeshGeometry, self).__init__()
@@ -320,6 +338,10 @@ class ObjMeshGeometry(MeshGeometry):
         with open(fname, "r") as f:
             return MeshGeometry(f.read(), u"obj")
 
+    @staticmethod
+    def from_stream(f):
+        return MeshGeometry(data_from_stream(f), u"obj")
+
 
 class DaeMeshGeometry(MeshGeometry):
     def __init__(self, contents):
@@ -329,6 +351,10 @@ class DaeMeshGeometry(MeshGeometry):
     def from_file(fname):
         with open(fname, "r") as f:
             return MeshGeometry(f.read(), u"dae")
+
+    @staticmethod
+    def from_stream(f):
+        return MeshGeometry(data_from_stream(f), u"dae")
 
 
 class StlMeshGeometry(MeshGeometry):
@@ -342,6 +368,21 @@ class StlMeshGeometry(MeshGeometry):
             _, extcode = threejs_type(np.uint8)
             encoded = umsgpack.Ext(extcode, arr.tobytes())
             return MeshGeometry(encoded, u"stl")
+
+    @staticmethod
+    def from_stream(f):
+        if sys.version_info >= (3, 0):
+            if type(f) == BytesIO:
+                arr  = np.frombuffer(f.read(), dtype=np.uint8)
+            elif type(f) == StringIO:
+                arr = np.frombuffer(bytes(f.read(), "utf-8"), dtype=np.uint8)
+            else:
+                raise ValueError('Unexpected type')
+        else:
+            arr  = np.frombuffer(f.read(), dtype=np.uint8)
+        _, extcode = threejs_type(np.uint8)
+        encoded = umsgpack.Ext(extcode, arr.tobytes())
+        return MeshGeometry(encoded, u"stl")
 
 
 class PointsGeometry(Geometry):
