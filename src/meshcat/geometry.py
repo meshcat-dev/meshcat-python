@@ -388,3 +388,15 @@ def PointCloud(position, color, **kwargs):
         PointsGeometry(position, color),
         PointsMaterial(**kwargs)
     )
+
+
+class Line(Object):
+    _type = u"Line"
+
+
+class LineSegments(Object):
+    _type = u"LineSegments"
+
+
+class LineLoop(Object):
+    _type = u"LineLoop"
