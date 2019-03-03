@@ -303,12 +303,12 @@ def pack_numpy_array(x):
 
 def data_from_stream(stream):
     if sys.version_info >= (3, 0):
-        if type(stream) == BytesIO:
+        if isinstance(stream, BytesIO):
             data = stream.read().decode(encoding='utf-8')
-        elif type(stream) == StringIO:
+        elif isinstance(stream, StringIO):
             data = stream.read()
         else:
-            raise ValueError('Stream must be StringIO or BytesIO, not {}'.format(type(stream)))
+            raise ValueError('Stream must be instance of StringIO or BytesIO, not {}'.format(type(stream)))
     else:
         data = stream.read()
     return data
@@ -372,12 +372,12 @@ class StlMeshGeometry(MeshGeometry):
     @staticmethod
     def from_stream(f):
         if sys.version_info >= (3, 0):
-            if type(f) == BytesIO:
+            if isinstance(f, BytesIO):
                 arr  = np.frombuffer(f.read(), dtype=np.uint8)
-            elif type(f) == StringIO:
+            elif isinstance(f, StringIO):
                 arr = np.frombuffer(bytes(f.read(), "utf-8"), dtype=np.uint8)
             else:
-                raise ValueError('Unexpected type')
+                raise ValueError('Stream must be instance of StringIO or BytesIO, not {}'.format(type(f)))
         else:
             arr  = np.frombuffer(f.read(), dtype=np.uint8)
         _, extcode = threejs_type(np.uint8)
