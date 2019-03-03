@@ -431,9 +431,8 @@ def PointCloud(position, color, **kwargs):
 
 
 def SceneText(text, width=10, height=10, **kwargs):
-    plane = Plane(width=width,height=height)
     return Mesh(
-        plane,
+        Plane(width=width,height=height),
         MeshPhongMaterial(map=TextTexture(text,**kwargs),transparent=True,
             needsUpdate=True)
         )
@@ -449,4 +448,3 @@ class LineSegments(Object):
 
 class LineLoop(Object):
     _type = u"LineLoop"
-
