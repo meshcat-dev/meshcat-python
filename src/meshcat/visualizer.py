@@ -134,9 +134,8 @@ class Visualizer:
     def __getitem__(self, path):
         return Visualizer.view_into(self.window, self.path.append(path))
 
-    def set_object(self, geometry, material=None, texts=None):
-        return self.window.send(SetObject(geometry, material, texts,
-           self.path))
+    def set_object(self, geometry, material=None):
+        return self.window.send(SetObject(geometry, material, self.path))
 
     def set_transform(self, matrix=np.eye(4)):
         return self.window.send(SetTransform(matrix, self.path))

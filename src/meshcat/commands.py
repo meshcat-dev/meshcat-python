@@ -9,7 +9,7 @@ MeshPhongMaterial, PointsMaterial, Points, TextTexture)
 
 class SetObject:
     __slots__ = ["object", "path"]
-    def __init__(self, geometry_or_object, material=None, texts=None, path=[]):
+    def __init__(self, geometry_or_object, material=None, path=[]):
         if isinstance(geometry_or_object, Object):
             if material is not None:
                 raise(ArgumentError("Please supply either an Object OR a Geometry and a Material"))
@@ -20,9 +20,6 @@ class SetObject:
             if isinstance(material, PointsMaterial):
                 self.object = Points(geometry_or_object, material)
             else:
-                if texts is not None:
-                    material.map = TextTexture(texts)
-                    material.needsUpdate = True
                 self.object = Mesh(geometry_or_object, material)
         self.path = path
 

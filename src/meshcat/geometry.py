@@ -429,11 +429,8 @@ def PointCloud(position, color, **kwargs):
     )
 
 
-def SceneText(text, **kwargs):
-    if 'width' in kwargs and 'height' in kwargs:
-        plane = Plane(kwargs.pop('width'), kwargs.pop('height'))
-    else:
-        plane = Plane(width=10,height=10)
+def SceneText(text, width=10, height=10, **kwargs):
+    plane = Plane(width=width,height=height)
     return Mesh(
         plane,
         MeshPhongMaterial(map=TextTexture(text,**kwargs),transparent=True,
