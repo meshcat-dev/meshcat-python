@@ -5,6 +5,14 @@ import subprocess
 import sys
 import os
 
+if sys.version_info >= (3, 0):
+    from io import StringIO, BytesIO
+else:
+    from StringIO import StringIO
+    BytesIO = StringIO
+
+import io
+
 import numpy as np
 
 import meshcat
@@ -79,6 +87,48 @@ class TestDrawing(VisualizerTest):
         colors = verts
         v["random"].set_object(g.PointCloud(verts, colors))
         v["random"].set_transform(tf.translation_matrix([-0.5, -0.5, 0]))
+
+    def test_mesh_stream(self):
+        """ Applications using meshcat may already have meshes loaded in memory. It is
+        more efficient to load these meshes with streams rather than going to and then
+        from a file on disk. To test this we are importing meshes from disk and 
+        converting them into streams so it kind of defeats the intended purpose! But at
+        least it tests the functionality.
+        """
+        self.vis.delete()
+        v = self.vis["meshes/convex"]
+
+        # Obj file
+        filename = os.path.join(meshcat.viewer_assets_path(),
+                                "../tests/data/mesh_0_convex_piece_0.obj")
+        with open(filename, "r") as f:
+            fio = StringIO(f.read())
+            v["stream_obj"].set_object(g.Mesh(g.ObjMeshGeometry.from_stream(fio)))
+            v["stream_stl_ascii"].set_transform(tf.translation_matrix([0, 0.0, 0]))
+
+        # STL ASCII
+        filename = os.path.join(meshcat.viewer_assets_path(),
+                                "../tests/data/mesh_0_convex_piece_0.stl_ascii")
+        with open(filename, "r") as f:
+            fio = StringIO(f.read())
+            v["stream_stl_ascii"].set_object(g.Mesh(g.StlMeshGeometry.from_stream(fio)))
+            v["stream_stl_ascii"].set_transform(tf.translation_matrix([0, -0.5, 0]))
+
+        # STL Binary
+        filename = os.path.join(meshcat.viewer_assets_path(),
+                                "../tests/data/mesh_0_convex_piece_0.stl_binary")
+        with open(filename, "rb") as f:
+            fio = BytesIO(f.read())
+            v["stream_stl_binary"].set_object(g.Mesh(g.StlMeshGeometry.from_stream(fio)))
+            v["stream_stl_binary"].set_transform(tf.translation_matrix([0, -1.0, 0]))
+
+        # DAE
+        filename = os.path.join(meshcat.viewer_assets_path(),
+                                "../tests/data/mesh_0_convex_piece_0.dae")
+        with open(filename, "r") as f:
+            fio = StringIO(f.read())
+            v["stream_dae"].set_object(g.Mesh(g.DaeMeshGeometry.from_stream(fio)))
+            v["stream_dae"].set_transform(tf.translation_matrix([0, -1.5, 0]))
 
 
 class TestStandaloneServer(unittest.TestCase):
