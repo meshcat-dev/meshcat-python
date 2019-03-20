@@ -88,10 +88,12 @@ class TestDrawing(VisualizerTest):
         v["random"].set_object(g.PointCloud(verts, colors))
         v["random"].set_transform(tf.translation_matrix([-0.5, -0.5, 0]))
 
-    def test_mesh_stream(self):
+
+class TestMeshStreams(VisualizerTest):
+    def runTest(self):
         """ Applications using meshcat may already have meshes loaded in memory. It is
         more efficient to load these meshes with streams rather than going to and then
-        from a file on disk. To test this we are importing meshes from disk and 
+        from a file on disk. To test this we are importing meshes from disk and
         converting them into streams so it kind of defeats the intended purpose! But at
         least it tests the functionality.
         """
