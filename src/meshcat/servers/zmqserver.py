@@ -94,7 +94,7 @@ class FileHandler(tornado.web.RequestHandler):
             raise tornado.web.HTTPError(status_code=404)
         content_type, _ = guess_type(file_location)
         self.add_header('Content-Type', content_type)
-        with open(file_location) as source_file:
+        with open(file_location, "rb") as source_file:
             self.write(source_file.read())
 
 
