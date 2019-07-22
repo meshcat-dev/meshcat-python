@@ -229,7 +229,10 @@ def main():
     if results.open:
         webbrowser.open(bridge.web_url, new=2)
 
-    bridge.run()
+    try:
+        bridge.run()
+    except KeyboardInterrupt:
+        pass
 
 if __name__ == '__main__':
     main()
