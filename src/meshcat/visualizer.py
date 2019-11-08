@@ -105,7 +105,7 @@ class Visualizer:
 
     def __init__(self, zmq_url=None, window=None, args=[]):
         if window is None:
-            self.window = ViewerWindow(zmq_url=zmq_url, start_server=(zmq_url is None), args)
+            self.window = ViewerWindow(zmq_url=zmq_url, start_server=(zmq_url is None), args=args)
         else:
             self.window = window
         self.path = Path(("meshcat",))
