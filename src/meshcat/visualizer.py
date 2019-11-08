@@ -32,10 +32,10 @@ def match_web_url(line):
 class ViewerWindow:
     context = zmq.Context()
 
-    def __init__(self, zmq_url, start_server):
+    def __init__(self, zmq_url, start_server, args):
         if start_server:
             # Need -u for unbuffered output: https://stackoverflow.com/a/25572491
-            args = [sys.executable, "-u", "-m", "meshcat.servers.zmqserver"]
+            args = [sys.executable, "-u", "-m", "meshcat.servers.zmqserver"] + args
             if zmq_url is not None:
                 args.append("--zmq-url")
                 args.append(zmq_url)
@@ -103,9 +103,9 @@ class ViewerWindow:
 class Visualizer:
     __slots__ = ["window", "path"]
 
-    def __init__(self, zmq_url=None, window=None):
+    def __init__(self, zmq_url=None, window=None, args=[]):
         if window is None:
-            self.window = ViewerWindow(zmq_url=zmq_url, start_server=(zmq_url is None))
+            self.window = ViewerWindow(zmq_url=zmq_url, start_server=(zmq_url is None), args)
         else:
             self.window = window
         self.path = Path(("meshcat",))
@@ -171,13 +171,15 @@ class Visualizer:
 if __name__ == '__main__':
     import time
     import sys
-
+    args = []
     if len(sys.argv) > 1:
         zmq_url = sys.argv[1]
+        if len(sys.argv) > 2:
+            args = sys.argv[2:]
     else:
         zmq_url = None
 
-    window = ViewerWindow(zmq_url, zmq_url is None, True)
+    window = ViewerWindow(zmq_url, zmq_url is None, True, args)
 
     while True:
         time.sleep(100)
