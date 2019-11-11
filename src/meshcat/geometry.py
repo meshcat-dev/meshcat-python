@@ -138,7 +138,7 @@ class MeshMaterial(Material):
         # opacity value to decide whether to set transparent to True or
         # False.
         if self.transparent is None:
-            transparent = self.opacity != 1
+            transparent = bool(self.opacity != 1)
         else:
             transparent = self.transparent
         data = {
