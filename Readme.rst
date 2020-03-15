@@ -44,7 +44,7 @@ Ubuntu/Debian:
 
 ::
 
-    apt-get install libzmq3
+    apt-get install libzmq3-dev
 
 Homebrew:
 
