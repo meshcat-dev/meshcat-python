@@ -1,6 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
 import atexit
+import base64
+import os
 import sys
 import subprocess
 import webbrowser
@@ -93,6 +95,19 @@ class ViewerWindow:
         ])
         self.zmq_socket.recv()
 
+    def get_scene(self):
+        """Get the scene as a binary blob from the ZMQ server."""
+        self.zmq_socket.send(b"get_scene")
+        return self.zmq_socket.recv()
+
+
+def create_command(data):
+    return """
+fetch("data:application/octet-binary;base64,{}")
+    .then(res => res.arrayBuffer())
+    .then(buffer => viewer.handle_command_bytearray(new Uint8Array(buffer)));
+    """.format(base64.b64encode(data))
+
 
 class Visualizer:
     __slots__ = ["window", "path", "tree"]
@@ -103,7 +118,6 @@ class Visualizer:
         else:
             self.window = window
         self.path = Path(("meshcat",))
-        self.tree = 
 
     @staticmethod
     def view_into(window, path):
@@ -150,56 +164,47 @@ class Visualizer:
     def close(self):
         self.window.close()
 
-    # def static_html(self):
-    #     """
-    #     Generate and save a static HTML file that standalone encompasses the visualizer and contents.
-    #     
-    #     Ask the server for the scene (since the server knows it), and pack it all into an
-    #     HTML blob for future use.
-    #     """
-    #     viewer_commands = String[]
+    def static_html(self):
+        """
+        Generate and save a static HTML file that standalone encompasses the visualizer and contents.
+        
+        Ask the server for the scene (since the server knows it), and pack it all into an
+        HTML blob for future use.
+        """
+        scene_blob = self.window.get_scene()
+        # base64-encode this so we can embed it into javascript
+        b64encoded = create_command(scene_blob)
 
-    #     foreach(core.tree) do node
-    #         if node.object !== nothing
-    #             push!(viewer_commands, _create_command(node.object));
-    #         end
-    #         if node.transform !== nothing
-    #             push!(viewer_commands, _create_command(node.transform));
-    #         end
-    #         for data in values(node.properties)
-    #             push!(viewer_commands, _create_command(data));
-    #         end
-    #         if node.animation !== nothing
-    #             push!(viewer_commands, _create_command(node.animation))
-    #         end
-    #     end
+        # assets path for main.min.js, which we need to open and embed
+        from . import viewer_assets_path
+        mainminjs_path = os.path.join(viewer_assets_path(), "dist", "main.min.js")
 
-    #     return """
-    #         <!DOCTYPE html>
-    #         <html>
-    #             <head> <meta charset=utf-8> <title>MeshCat</title> </head>
-    #             <body>
-    #                 <div id="meshcat-pane">
-    #                 </div>
-    #                 <script>
-    #                     $(open(s -> read(s, String), joinpath(VIEWER_ROOT, "main.min.js")))
-    #                 </script>
-    #                 <script>
-    #                     var viewer = new MeshCat.Viewer(document.getElementById("meshcat-pane"));
-    #                     $(join(viewer_commands, '\n'))
-    #                 </script>
-    #                  <style>
-    #                     body {margin: 0; }
-    #                     #meshcat-pane {
-    #                         width: 100vw;
-    #                         height: 100vh;
-    #                         overflow: hidden;
-    #                     }
-    #                 </style>
-    #                 <script id="embedded-json"></script>
-    #             </body>
-    #         </html>
-    #     """
+        return """
+            <!DOCTYPE html>
+            <html>
+                <head> <meta charset=utf-8> <title>MeshCat</title> </head>
+                <body>
+                    <div id="meshcat-pane">
+                    </div>
+                    <script>
+                        {mainminjs}
+                    </script>
+                    <script>
+                        var viewer = new MeshCat.Viewer(document.getElementById("meshcat-pane"));
+                        {commands}
+                    </script>
+                     <style>
+                        body {{margin: 0; }}
+                        #meshcat-pane {{
+                            width: 100vw;
+                            height: 100vh;
+                            overflow: hidden;
+                        }}
+                    </style>
+                    <script id="embedded-json"></script>
+                </body>
+            </html>
+        """.format(mainminjs=open(mainminjs_path, "r"), commands=b64encoded)
 
     def __repr__(self):
         return "<Visualizer using: {window} at path: {path}>".format(window=self.window, path=self.path)
