@@ -102,11 +102,12 @@ class ViewerWindow:
 
 
 def create_command(data):
+    """Encode the bytestream from the ZMQ server as a string we can embed into JS."""
     return """
 fetch("data:application/octet-binary;base64,{}")
     .then(res => res.arrayBuffer())
     .then(buffer => viewer.handle_command_bytearray(new Uint8Array(buffer)));
-    """.format(base64.b64encode(data))
+    """.format(base64.b64encode(data).decode("utf-8"))
 
 
 class Visualizer:
@@ -176,8 +177,14 @@ class Visualizer:
         b64encoded = create_command(scene_blob)
 
         # assets path for main.min.js, which we need to open and embed
+        # we have to import the viewer_assets_path here, otherwise we have
+        # a circular import when importing during the __init__.py
         from . import viewer_assets_path
         mainminjs_path = os.path.join(viewer_assets_path(), "dist", "main.min.js")
+        mainminjs_src = ""
+        with open(mainminjs_path, "r") as f:
+            mainminjs_src = f.readlines()
+        mainminjs_src = "".join(mainminjs_src)
 
         return """
             <!DOCTYPE html>
@@ -204,7 +211,7 @@ class Visualizer:
                     <script id="embedded-json"></script>
                 </body>
             </html>
-        """.format(mainminjs=open(mainminjs_path, "r"), commands=b64encoded)
+        """.format(mainminjs=mainminjs_src, commands=b64encoded)
 
     def __repr__(self):
         return "<Visualizer using: {window} at path: {path}>".format(window=self.window, path=self.path)
