@@ -133,6 +133,16 @@ class ZMQWebSocketBridge(object):
                 else:
                     self.tree = SceneTree()
             self.zmq_socket.send(b"ok")
+        elif cmd == "get_scene":
+            # when the server gets this command, return the tree
+            # as a series of msgpack-backed binary blobs
+            output = b""
+            for node in walk(self.tree):
+                if node.object is not None:
+                    output += node.object
+                if node.transform is not None:
+                    output += node.transform
+            self.zmq_socket.send(output)
         else:
             self.zmq_socket.send(b"error: unrecognized comand")
 

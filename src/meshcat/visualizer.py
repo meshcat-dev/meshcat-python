@@ -95,7 +95,7 @@ class ViewerWindow:
 
 
 class Visualizer:
-    __slots__ = ["window", "path"]
+    __slots__ = ["window", "path", "tree"]
 
     def __init__(self, zmq_url=None, window=None):
         if window is None:
@@ -103,6 +103,7 @@ class Visualizer:
         else:
             self.window = window
         self.path = Path(("meshcat",))
+        self.tree = 
 
     @staticmethod
     def view_into(window, path):
@@ -148,6 +149,57 @@ class Visualizer:
 
     def close(self):
         self.window.close()
+
+    # def static_html(self):
+    #     """
+    #     Generate and save a static HTML file that standalone encompasses the visualizer and contents.
+    #     
+    #     Ask the server for the scene (since the server knows it), and pack it all into an
+    #     HTML blob for future use.
+    #     """
+    #     viewer_commands = String[]
+
+    #     foreach(core.tree) do node
+    #         if node.object !== nothing
+    #             push!(viewer_commands, _create_command(node.object));
+    #         end
+    #         if node.transform !== nothing
+    #             push!(viewer_commands, _create_command(node.transform));
+    #         end
+    #         for data in values(node.properties)
+    #             push!(viewer_commands, _create_command(data));
+    #         end
+    #         if node.animation !== nothing
+    #             push!(viewer_commands, _create_command(node.animation))
+    #         end
+    #     end
+
+    #     return """
+    #         <!DOCTYPE html>
+    #         <html>
+    #             <head> <meta charset=utf-8> <title>MeshCat</title> </head>
+    #             <body>
+    #                 <div id="meshcat-pane">
+    #                 </div>
+    #                 <script>
+    #                     $(open(s -> read(s, String), joinpath(VIEWER_ROOT, "main.min.js")))
+    #                 </script>
+    #                 <script>
+    #                     var viewer = new MeshCat.Viewer(document.getElementById("meshcat-pane"));
+    #                     $(join(viewer_commands, '\n'))
+    #                 </script>
+    #                  <style>
+    #                     body {margin: 0; }
+    #                     #meshcat-pane {
+    #                         width: 100vw;
+    #                         height: 100vh;
+    #                         overflow: hidden;
+    #                     }
+    #                 </style>
+    #                 <script id="embedded-json"></script>
+    #             </body>
+    #         </html>
+    #     """
 
     def __repr__(self):
         return "<Visualizer using: {window} at path: {path}>".format(window=self.window, path=self.path)
