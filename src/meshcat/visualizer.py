@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
 import atexit
-import base64
 import os
 import sys
 import subprocess
@@ -101,13 +100,13 @@ class ViewerWindow:
         return self.zmq_socket.recv()
 
 
-def create_command(data):
-    """Encode the bytestream from the ZMQ server as a string we can embed into JS."""
+def create_command(data) -> str:
+    """Encode the b64-encoded string from the ZMQ server into something we can embed into JS."""
     return """
 fetch("data:application/octet-binary;base64,{}")
     .then(res => res.arrayBuffer())
     .then(buffer => viewer.handle_command_bytearray(new Uint8Array(buffer)));
-    """.format(base64.b64encode(data).decode("utf-8"))
+    """.format(data.decode("utf-8"))
 
 
 class Visualizer:

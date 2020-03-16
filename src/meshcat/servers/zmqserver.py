@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+import base64
 import os
 import sys
 import multiprocessing
@@ -68,6 +69,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         self.bridge.websocket_pool.remove(self)
         print("closed:", self, file=sys.stderr)
+
+
+def create_base64(data):
+    """Create a base64 encoded version of the Three.js data that can be embedded."""
+    return base64.b64encode(data)
 
 
 class ZMQWebSocketBridge(object):
@@ -139,9 +145,9 @@ class ZMQWebSocketBridge(object):
             output = b""
             for node in walk(self.tree):
                 if node.object is not None:
-                    output += node.object
+                    output += create_base64(node.object)
                 if node.transform is not None:
-                    output += node.transform
+                    output += create_base64(node.transform)
             self.zmq_socket.send(output)
         else:
             self.zmq_socket.send(b"error: unrecognized comand")
