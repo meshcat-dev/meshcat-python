@@ -94,7 +94,7 @@ class ViewerWindow:
         self.zmq_socket.recv()
 
     def get_scene(self):
-        """Get the scene as a binary blob from the ZMQ server."""
+        """Get the static HTML from the ZMQ server."""
         self.zmq_socket.send(b"get_scene")
         # we receive the HTML as utf-8-encoded, so decode here
         return self.zmq_socket.recv().decode('utf-8')
