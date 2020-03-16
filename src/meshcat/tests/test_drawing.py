@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 import unittest
 import subprocess
 import sys
+import tempfile
 import os
 
 if sys.version_info >= (3, 0):
@@ -197,3 +198,14 @@ class TestCameraAnimation(VisualizerTest):
         with animation.at_frame(v, 30) as frame_vis:
             frame_vis["/Cameras/default/rotated/<object>"].set_property("zoom", "number", 0.5)
         v.set_animation(animation)
+
+
+class TestStaticHTML(TestDrawing):
+    def runTest(self):
+        """Test that we can generate a static HTML file from the Drawing test case and view it."""
+        super(TestStaticHTML, self).runTest()
+        res = self.vis.static_html()
+        # save to a file
+        temp = tempfile.mkstemp(suffix=".html")
+        with open(temp[1], "w") as f:
+            f.write(res)
