@@ -97,16 +97,8 @@ class ViewerWindow:
     def get_scene(self):
         """Get the scene as a binary blob from the ZMQ server."""
         self.zmq_socket.send(b"get_scene")
-        return self.zmq_socket.recv()
-
-
-def create_command(data) -> str:
-    """Encode the b64-encoded string from the ZMQ server into something we can embed into JS."""
-    return """
-fetch("data:application/octet-binary;base64,{}")
-    .then(res => res.arrayBuffer())
-    .then(buffer => viewer.handle_command_bytearray(new Uint8Array(buffer)));
-    """.format(data.decode("utf-8"))
+        # we receive the HTML as utf-8-encoded, so decode here
+        return self.zmq_socket.recv().decode('utf-8')
 
 
 class Visualizer:
@@ -171,46 +163,7 @@ class Visualizer:
         Ask the server for the scene (since the server knows it), and pack it all into an
         HTML blob for future use.
         """
-        scene_blob = self.window.get_scene()
-        # base64-encode this so we can embed it into javascript
-        b64encoded = create_command(scene_blob)
-
-        # assets path for main.min.js, which we need to open and embed
-        # we have to import the viewer_assets_path here, otherwise we have
-        # a circular import when importing during the __init__.py
-        from . import viewer_assets_path
-        mainminjs_path = os.path.join(viewer_assets_path(), "dist", "main.min.js")
-        mainminjs_src = ""
-        with open(mainminjs_path, "r") as f:
-            mainminjs_src = f.readlines()
-        mainminjs_src = "".join(mainminjs_src)
-
-        return """
-            <!DOCTYPE html>
-            <html>
-                <head> <meta charset=utf-8> <title>MeshCat</title> </head>
-                <body>
-                    <div id="meshcat-pane">
-                    </div>
-                    <script>
-                        {mainminjs}
-                    </script>
-                    <script>
-                        var viewer = new MeshCat.Viewer(document.getElementById("meshcat-pane"));
-                        {commands}
-                    </script>
-                     <style>
-                        body {{margin: 0; }}
-                        #meshcat-pane {{
-                            width: 100vw;
-                            height: 100vh;
-                            overflow: hidden;
-                        }}
-                    </style>
-                    <script id="embedded-json"></script>
-                </body>
-            </html>
-        """.format(mainminjs=mainminjs_src, commands=b64encoded)
+        return self.window.get_scene()
 
     def __repr__(self):
         return "<Visualizer using: {window} at path: {path}>".format(window=self.window, path=self.path)
