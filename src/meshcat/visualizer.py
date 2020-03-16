@@ -110,7 +110,7 @@ fetch("data:application/octet-binary;base64,{}")
 
 
 class Visualizer:
-    __slots__ = ["window", "path", "tree"]
+    __slots__ = ["window", "path"]
 
     def __init__(self, zmq_url=None, window=None):
         if window is None:
