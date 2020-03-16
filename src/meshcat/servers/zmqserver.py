@@ -71,7 +71,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         print("closed:", self, file=sys.stderr)
 
 
-def create_command(data) -> str:
+def create_command(data):
     """Encode the drawing command into a Javascript fetch() command for display."""
     return """
 fetch("data:application/octet-binary;base64,{}")
