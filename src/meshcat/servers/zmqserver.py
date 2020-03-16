@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+import base64
 import os
 import sys
 import multiprocessing
@@ -70,6 +71,15 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         print("closed:", self, file=sys.stderr)
 
 
+def create_command(data):
+    """Encode the drawing command into a Javascript fetch() command for display."""
+    return """
+fetch("data:application/octet-binary;base64,{}")
+    .then(res => res.arrayBuffer())
+    .then(buffer => viewer.handle_command_bytearray(new Uint8Array(buffer)));
+    """.format(base64.b64encode(data).decode("utf-8"))
+
+
 class ZMQWebSocketBridge(object):
     context = zmq.Context()
 
@@ -133,6 +143,51 @@ class ZMQWebSocketBridge(object):
                 else:
                     self.tree = SceneTree()
             self.zmq_socket.send(b"ok")
+        elif cmd == "get_scene":
+            # when the server gets this command, return the tree
+            # as a series of msgpack-backed binary blobs
+            drawing_commands = ""
+            for node in walk(self.tree):
+                if node.object is not None:
+                    drawing_commands += create_command(node.object)
+                if node.transform is not None:
+                    drawing_commands += create_command(node.transform)
+
+            # now that we have the drawing commands, generate the full
+            # HTML that we want to generate, including the javascript assets
+            mainminjs_path = os.path.join(VIEWER_ROOT, "main.min.js")
+            mainminjs_src = ""
+            with open(mainminjs_path, "r") as f:
+                mainminjs_src = f.readlines()
+            mainminjs_src = "".join(mainminjs_src)
+
+            html = """
+                <!DOCTYPE html>
+                <html>
+                    <head> <meta charset=utf-8> <title>MeshCat</title> </head>
+                    <body>
+                        <div id="meshcat-pane">
+                        </div>
+                        <script>
+                            {mainminjs}
+                        </script>
+                        <script>
+                            var viewer = new MeshCat.Viewer(document.getElementById("meshcat-pane"));
+                            {commands}
+                        </script>
+                         <style>
+                            body {{margin: 0; }}
+                            #meshcat-pane {{
+                                width: 100vw;
+                                height: 100vh;
+                                overflow: hidden;
+                            }}
+                        </style>
+                        <script id="embedded-json"></script>
+                    </body>
+                </html>
+            """.format(mainminjs=mainminjs_src, commands=drawing_commands)
+            self.zmq_socket.send(html.encode('utf-8'))
         else:
             self.zmq_socket.send(b"error: unrecognized comand")
 

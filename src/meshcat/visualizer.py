@@ -93,6 +93,12 @@ class ViewerWindow:
         ])
         self.zmq_socket.recv()
 
+    def get_scene(self):
+        """Get the static HTML from the ZMQ server."""
+        self.zmq_socket.send(b"get_scene")
+        # we receive the HTML as utf-8-encoded, so decode here
+        return self.zmq_socket.recv().decode('utf-8')
+
 
 class Visualizer:
     __slots__ = ["window", "path"]
@@ -148,6 +154,15 @@ class Visualizer:
 
     def close(self):
         self.window.close()
+
+    def static_html(self):
+        """
+        Generate and save a static HTML file that standalone encompasses the visualizer and contents.
+        
+        Ask the server for the scene (since the server knows it), and pack it all into an
+        HTML blob for future use.
+        """
+        return self.window.get_scene()
 
     def __repr__(self):
         return "<Visualizer using: {window} at path: {path}>".format(window=self.window, path=self.path)
