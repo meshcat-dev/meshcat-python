@@ -17,9 +17,6 @@ import tornado.ioloop
 import tornado.websocket
 import tornado.gen
 
-import mimetypes
-from mimetypes import guess_type
-
 import zmq
 from zmq.eventloop import ioloop
 from zmq.eventloop.zmqstream import ZMQStream
@@ -38,8 +35,6 @@ DEFAULT_FILESERVER_PORT = 7000
 MAX_ATTEMPTS = 1000
 DEFAULT_ZMQ_METHOD = "tcp"
 DEFAULT_ZMQ_PORT = 6000
-
-KNOWN_TYPES = ['stl', 'obj', 'dae', 'png', 'bmp', 'jpeg', 'jpg', 'mtl']
 
 MESHCAT_COMMANDS = ["set_transform", "set_object", "delete", "set_property", "set_animation"]
 
@@ -75,28 +70,6 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.bridge.websocket_pool.remove(self)
         print("closed:", self, file=sys.stderr)
 
-class FileHandler(tornado.web.RequestHandler):
-    def initialize(self, root):
-        self.root = root
-        mimetypes.add_type("model/vnd.collada+xml", ".dae")
-        mimetypes.add_type("text/plain", ".mtl")
-
-    def get(self, path_in):
-        if path_in[0] == '/':
-            path = path_in[1:]
-        else:
-            path = path_in
-        file_location = os.path.join(self.root, path)
-        filename, file_extension = os.path.splitext(path)
-        if any(ext == file_extension.lower() for ext in KNOWN_TYPES):
-            raise tornado.web.HTTPError(status_code=403)
-        if not os.path.isfile(file_location):
-            raise tornado.web.HTTPError(status_code=404)
-        content_type, _ = guess_type(file_location)
-        self.add_header('Content-Type', content_type)
-        with open(file_location, "rb") as source_file:
-            self.write(source_file.read())
-
 
 def create_command(data):
     """Encode the drawing command into a Javascript fetch() command for display."""
@@ -110,15 +83,9 @@ fetch("data:application/octet-binary;base64,{}")
 class ZMQWebSocketBridge(object):
     context = zmq.Context()
 
-    def __init__(self, zmq_url=None, host="127.0.0.1", port=None, path_root=None):
+    def __init__(self, zmq_url=None, host="127.0.0.1", port=None):
         self.host = host
         self.websocket_pool = set()
-        if path_root is None:
-            self.path_root = None
-        else:
-            self.path_root = path_root
-            print("Enabling file service with root at '" + self.path_root + "'")
-            print("Allowed file extensions: ", KNOWN_TYPES)
         self.app = self.make_app()
         self.ioloop = tornado.ioloop.IOLoop.current()
 
@@ -135,17 +102,14 @@ class ZMQWebSocketBridge(object):
             self.app.listen(port)
             self.fileserver_port = port
         self.web_url = "http://{host}:{port}/static/".format(host=self.host, port=self.fileserver_port)
-        self.file_url = "http://{host}:{port}/files/".format(host=self.host, port=self.fileserver_port)
 
         self.tree = SceneTree()
 
     def make_app(self):
-        handlers = []
-        handlers.append((r"/static/(.*)", tornado.web.StaticFileHandler, {"path": VIEWER_ROOT, "default_filename": VIEWER_HTML}))
-        if not self.path_root is None:
-            handlers.append((r"/files/(.*)", FileHandler, {"root": self.path_root}))
-        handlers.append((r"/", WebSocketHandler, {"bridge": self}))
-        return tornado.web.Application(handlers)
+        return tornado.web.Application([
+            (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": VIEWER_ROOT, "default_filename": VIEWER_HTML}),
+            (r"/", WebSocketHandler, {"bridge": self})
+        ])
 
     def wait_for_websockets(self):
         if len(self.websocket_pool) > 0:
@@ -157,8 +121,6 @@ class ZMQWebSocketBridge(object):
         cmd = frames[0].decode("utf-8")
         if cmd == "url":
             self.zmq_socket.send(self.web_url.encode("utf-8"))
-        elif cmd == "file_url":
-            self.zmq_socket.send(self.file_url.encode("utf-8"))
         elif cmd == "wait":
             self.ioloop.add_callback(self.wait_for_websockets)
         elif cmd in MESHCAT_COMMANDS:
@@ -259,14 +221,11 @@ def main():
 
     parser = argparse.ArgumentParser(description="Serve the MeshCat HTML files and listen for ZeroMQ commands")
     parser.add_argument('--zmq-url', '-z', type=str, nargs="?", default=None)
-    parser.add_argument('--file-root', '-f', type=str, nargs="?", default=None)
     parser.add_argument('--open', '-o', action="store_true")
     results = parser.parse_args()
-    bridge = ZMQWebSocketBridge(zmq_url=results.zmq_url, path_root=results.file_root)
+    bridge = ZMQWebSocketBridge(zmq_url=results.zmq_url)
     print("zmq_url={:s}".format(bridge.zmq_url))
     print("web_url={:s}".format(bridge.web_url))
-    if not bridge.path_root is None:
-        print("file_url={:s}".format(bridge.file_url))
     if results.open:
         webbrowser.open(bridge.web_url, new=2)
 
