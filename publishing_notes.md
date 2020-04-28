@@ -5,8 +5,8 @@
 
 3. Upload
 
-    python -m pip install --upgrade setuptools wheel
+    python3 -m pip install --upgrade setuptools wheel
     rm dist/*
-    python setup.py sdist bdist_wheel
-    python -m pip install --upgrade twine
+    python3 setup.py sdist bdist_wheel
+    python3 -m pip install --upgrade twine
     twine upload dist/*
