@@ -23,11 +23,6 @@ from zmq.eventloop.zmqstream import ZMQStream
 
 from .tree import SceneTree, walk, find_node
 
-# Install ZMQ ioloop instead of a tornado ioloop
-# http://zeromq.github.com/pyzmq/eventloop.html
-ioloop.install()
-
-
 VIEWER_ROOT = os.path.join(os.path.dirname(__file__), "..", "viewer", "dist")
 VIEWER_HTML = "index.html"
 
