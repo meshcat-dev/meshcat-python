@@ -80,6 +80,16 @@ fetch("data:application/octet-binary;base64,{}")
     """.format(base64.b64encode(data).decode("utf-8"))
 
 
+class StaticFileHandlerNoCache(tornado.web.StaticFileHandler):
+    """Ensures static files do not get cached.
+
+    Taken from: https://stackoverflow.com/a/18879658/7829525
+    """
+    def set_extra_headers(self, path):
+        # Disable cache
+        self.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+
+
 class ZMQWebSocketBridge(object):
     context = zmq.Context()
 
@@ -107,7 +117,7 @@ class ZMQWebSocketBridge(object):
 
     def make_app(self):
         return tornado.web.Application([
-            (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": VIEWER_ROOT, "default_filename": VIEWER_HTML}),
+            (r"/static/(.*)", StaticFileHandlerNoCache, {"path": VIEWER_ROOT, "default_filename": VIEWER_HTML}),
             (r"/", WebSocketHandler, {"bridge": self})
         ])
 
