@@ -2,6 +2,7 @@ __pycache__
 *.pyc
 venv
 *.egg-info
+*.eggs/
 .ipynb_checkpoints
 build
 dist
