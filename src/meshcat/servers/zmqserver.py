@@ -18,10 +18,25 @@ import tornado.websocket
 import tornado.gen
 
 import zmq
-from zmq.eventloop import ioloop
+import zmq.eventloop.ioloop
 from zmq.eventloop.zmqstream import ZMQStream
 
 from .tree import SceneTree, walk, find_node
+
+
+def _zmq_install_ioloop():
+    # For pyzmq<17, install ioloop instead of a tornado ioloop
+    # http://zeromq.github.com/pyzmq/eventloop.html
+    try:
+        pyzmq_major = int(zmq.__version__.split(".")[0])
+    except ValueError:
+        # Development version?
+        return
+    if pyzmq_major < 17:
+        zmq.eventloop.ioloop.install()
+
+
+_zmq_install_ioloop()
 
 VIEWER_ROOT = os.path.join(os.path.dirname(__file__), "..", "viewer", "dist")
 VIEWER_HTML = "index.html"
