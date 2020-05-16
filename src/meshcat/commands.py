@@ -4,7 +4,8 @@ import sys
 if sys.version_info >= (3, 0):
     unicode = str
 
-from .geometry import Geometry, Object, Mesh, MeshPhongMaterial, PointsMaterial, Points
+from .geometry import (Geometry, Plane, Object, Mesh,
+MeshPhongMaterial, PointsMaterial, Points, TextTexture)
 
 class SetObject:
     __slots__ = ["object", "path"]
