@@ -410,8 +410,8 @@ class TriangularMeshGeometry(Geometry):
 
         vertices = np.asarray(vertices, dtype=np.float32)
         faces = np.asarray(faces, dtype=np.uint32)
-        assert(vertices.shape[1] == 3, "`vertices` must be an Nx3 array")
-        assert(faces.shape[1] == 3, "`faces` must be an Mx3 array")
+        assert vertices.shape[1] == 3, "`vertices` must be an Nx3 array"
+        assert faces.shape[1] == 3, "`faces` must be an Mx3 array"
         self.vertices = vertices
         self.faces = faces
 
