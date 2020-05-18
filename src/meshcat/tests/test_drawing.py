@@ -209,3 +209,24 @@ class TestStaticHTML(TestDrawing):
         temp = tempfile.mkstemp(suffix=".html")
         with open(temp[1], "w") as f:
             f.write(res)
+
+
+class TestTriangularMesh(VisualizerTest):
+    def runTest(self):
+        """
+        Test that we can render meshes from raw vertices and faces as
+        numpy arrays
+        """
+        v = self.vis["triangular_mesh"]
+        v.set_transform(tf.rotation_matrix(np.pi/2, [0., 0, 1]))
+        vertices = np.array([
+            [0, 0, 0],
+            [1, 0, 0],
+            [1, 0, 1],
+            [0, 0, 1]
+        ])
+        faces = np.array([
+            [0, 1, 2],
+            [3, 0, 2]
+        ])
+        v.set_object(g.TriangularMeshGeometry(vertices, faces), g.MeshLambertMaterial(color=0xeedd22, wireframe=True))
