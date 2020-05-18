@@ -385,6 +385,49 @@ class StlMeshGeometry(MeshGeometry):
         return MeshGeometry(encoded, u"stl")
 
 
+class TriangularMeshGeometry(Geometry):
+    """
+    A mesh consisting of an arbitrary collection of triangular faces. To construct one, you need to pass in a collection of vertices as an Nx3 array and a collection of faces as an Mx3 array. Each element of `faces` should be a collection of 3 indices into the `vertices` array.
+
+    For example, to create a square made out of two adjacent triangles, we could do:
+
+    vertices = np.array([
+        [0, 0, 0],  # the first vertex is at [0, 0, 0]
+        [1, 0, 0],
+        [1, 0, 1],
+        [0, 0, 1]
+    ])
+    faces = np.array([
+        [0, 1, 2],  # The first face consists of vertices 0, 1, and 2
+        [3, 0, 2]
+    ])
+
+    mesh = TriangularMeshGeometry(vertices, faces)
+    """
+    __slots__ = ["vertices", "faces"]
+    def __init__(self, vertices, faces):
+        super(TriangularMeshGeometry, self).__init__()
+
+        vertices = np.asarray(vertices, dtype=np.float32)
+        faces = np.asarray(faces, dtype=np.uint32)
+        assert(vertices.shape[1] == 3, "`vertices` must be an Nx3 array")
+        assert(faces.shape[1] == 3, "`faces` must be an Mx3 array")
+        self.vertices = vertices
+        self.faces = faces
+
+    def lower(self, object_data):
+        return {
+            u"uuid": self.uuid,
+            u"type": u"BufferGeometry",
+            u"data": {
+                u"attributes": {
+                    u"position": pack_numpy_array(self.vertices.T)
+                },
+                u"index": pack_numpy_array(self.faces.T)
+            }
+        }
+
+
 class PointsGeometry(Geometry):
     def __init__(self, position, color=None):
         super(PointsGeometry, self).__init__()
