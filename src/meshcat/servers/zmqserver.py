@@ -154,6 +154,8 @@ class ZMQWebSocketBridge(object):
                 find_node(self.tree, path).transform = data
             elif cmd == "set_object":
                 find_node(self.tree, path).object = data
+            elif cmd == "set_animation":
+                find_node(self.tree, path).animation = data
             elif cmd == "delete":
                 if len(path) > 0:
                     parent = find_node(self.tree, path[:-1])
@@ -172,6 +174,8 @@ class ZMQWebSocketBridge(object):
                     drawing_commands += create_command(node.object)
                 if node.transform is not None:
                     drawing_commands += create_command(node.transform)
+                if node.animation is not None:
+                    drawing_commands += create_command(node.animation)
 
             # now that we have the drawing commands, generate the full
             # HTML that we want to generate, including the javascript assets
@@ -229,6 +233,8 @@ class ZMQWebSocketBridge(object):
                 websocket.write_message(node.object, binary=True)
             if node.transform is not None:
                 websocket.write_message(node.transform, binary=True)
+            if node.animation is not None:
+                websocket.write_message(node.animation, binary=True)
 
     def run(self):
         self.ioloop.start()

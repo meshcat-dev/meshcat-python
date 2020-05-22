@@ -3,12 +3,13 @@ from __future__ import absolute_import, division, print_function
 from collections import defaultdict
 
 class TreeNode(defaultdict):
-    __slots__ = ["object", "transform"]
+    __slots__ = ["object", "transform", "animation"]
 
     def __init__(self, *args, **kwargs):
         super(TreeNode, self).__init__(*args, **kwargs)
         self.object = None
         self.transform = None
+        self.animation = None
 
 SceneTree = lambda: TreeNode(SceneTree)
 
