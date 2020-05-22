@@ -9,6 +9,7 @@ import umsgpack
 import numpy as np
 import zmq
 import re
+from IPython.display import HTML
 
 from .path import Path
 from .commands import SetObject, SetTransform, Delete, SetAnimation
@@ -100,6 +101,10 @@ class ViewerWindow:
         return self.zmq_socket.recv().decode('utf-8')
 
 
+def srcdoc_escape(x):
+    return x.replace("&", "&amp;").replace('"', "&quot;")
+
+
 class Visualizer:
     __slots__ = ["window", "path"]
 
@@ -130,12 +135,18 @@ class Visualizer:
         return self.window.wait()
 
     def jupyter_cell(self):
-        from IPython.display import HTML
         return HTML("""
-<div style="height: 400px; width: 100%; overflow-x: auto; overflow-y: hidden; resize: both">
-<iframe src="{url}" style="width: 100%; height: 100%; border: none"></iframe>
-</div>
-""".format(url=self.url()))
+            <div style="height: 400px; width: 100%; overflow-x: auto; overflow-y: hidden; resize: both">
+            <iframe src="{url}" style="width: 100%; height: 100%; border: none"></iframe>
+            </div>
+            """.format(url=self.url()))
+
+    def render_static(self):
+        return HTML("""
+        <div style="height: 400px; width: 100%; overflow-x: auto; overflow-y: hidden; resize: both">
+        <iframe srcdoc="{srcdoc}" style="width: 100%; height: 100%; border: none"></iframe>
+        </div>
+        """.format(srcdoc=srcdoc_escape(self.static_html())))
 
     def __getitem__(self, path):
         return Visualizer.view_into(self.window, self.path.append(path))
@@ -158,7 +169,7 @@ class Visualizer:
     def static_html(self):
         """
         Generate and save a static HTML file that standalone encompasses the visualizer and contents.
-        
+
         Ask the server for the scene (since the server knows it), and pack it all into an
         HTML blob for future use.
         """
