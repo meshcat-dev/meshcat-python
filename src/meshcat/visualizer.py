@@ -135,6 +135,12 @@ class Visualizer:
         return self.window.wait()
 
     def jupyter_cell(self):
+        """
+        Render the visualizer in a jupyter notebook or jupyterlab cell.
+
+        For this to work, it should be the very last command in the given jupyter
+        cell.
+        """
         return HTML("""
             <div style="height: 400px; width: 100%; overflow-x: auto; overflow-y: hidden; resize: both">
             <iframe src="{url}" style="width: 100%; height: 100%; border: none"></iframe>
@@ -142,6 +148,15 @@ class Visualizer:
             """.format(url=self.url()))
 
     def render_static(self):
+        """
+        Render a static snapshot of the visualizer in a jupyter notebook or
+        jupyterlab cell. The resulting snapshot of the visualizer will still be an
+        interactive 3D scene, but it won't be affected by any future `set_transform`
+        or `set_object` calls.
+
+        Note: this method should work well even when your jupyter kernel is running
+        on a different machine or inside a container.
+        """
         return HTML("""
         <div style="height: 400px; width: 100%; overflow-x: auto; overflow-y: hidden; resize: both">
         <iframe srcdoc="{srcdoc}" style="width: 100%; height: 100%; border: none"></iframe>
