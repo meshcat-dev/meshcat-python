@@ -44,10 +44,10 @@ class TestDrawing(VisualizerTest):
         self.vis.delete()
         v = self.vis["shapes"]
         v.set_transform(tf.translation_matrix([1., 0, 0]))
-        v["cube"].set_object(g.Box([1.0, 0.2, 0.3]))
-        v["cube"].delete()
-        v["cube"].set_object(g.Box([0.1, 0.2, 0.3]))
-        v["cube"].set_transform(tf.translation_matrix([0.05, 0.1, 0.15]))
+        v["box"].set_object(g.Box([1.0, 0.2, 0.3]))
+        v["box"].delete()
+        v["box"].set_object(g.Box([0.1, 0.2, 0.3]))
+        v["box"].set_transform(tf.translation_matrix([0.05, 0.1, 0.15]))
         v["cylinder"].set_object(g.Cylinder(0.2, 0.1), g.MeshLambertMaterial(color=0x22dd22))
         v["cylinder"].set_transform(tf.translation_matrix([0, 0.5, 0.1]).dot(tf.rotation_matrix(-np.pi / 2, [1, 0, 0])))
         v["sphere"].set_object(g.Mesh(g.Sphere(0.15), g.MeshLambertMaterial(color=0xff11dd)))
@@ -83,11 +83,46 @@ class TestDrawing(VisualizerTest):
 
 
         v = self.vis["points"]
-        v.set_transform(tf.translation_matrix([-1, 0, 0]))
-        verts = np.random.rand(3, 100000)
+        v.set_transform(tf.translation_matrix([0, 2, 0]))
+        verts = np.random.rand(3, 1000000)
         colors = verts
         v["random"].set_object(g.PointCloud(verts, colors))
         v["random"].set_transform(tf.translation_matrix([-0.5, -0.5, 0]))
+
+        v = self.vis["lines"]
+        v.set_transform(tf.translation_matrix(([-2, -3, 0])))
+
+        vertices = np.random.random((3, 10)).astype(np.float32)
+        v["line_segments"].set_object(g.LineSegments(g.PointsGeometry(vertices)))
+
+        v["line"].set_object(g.Line(g.PointsGeometry(vertices)))
+        v["line"].set_transform(tf.translation_matrix([0, 1, 0]))
+
+        v["line_loop"].set_object(g.LineLoop(g.PointsGeometry(vertices)))
+        v["line_loop"].set_transform(tf.translation_matrix([0, 2, 0]))
+
+        v["line_loop_with_material"].set_object(g.LineLoop(g.PointsGeometry(vertices), g.LineBasicMaterial(color=0xff0000)))
+        v["line_loop_with_material"].set_transform(tf.translation_matrix([0, 3, 0]))
+
+        colors = vertices  # Color each line by treating its xyz coordinates as RGB colors
+        v["line_with_vertex_colors"].set_object(g.Line(g.PointsGeometry(vertices, colors), g.LineBasicMaterial(vertexColors=True)))
+        v["line_with_vertex_colors"].set_transform(tf.translation_matrix([0, 4, 0]))
+
+        v["triad"].set_object(g.LineSegments(
+            g.PointsGeometry(position=np.array([
+                [0, 0, 0], [1, 0, 0],
+                [0, 0, 0], [0, 1, 0],
+                [0, 0, 0], [0, 0, 1]]).astype(np.float32).T,
+                color=np.array([
+                [1, 0, 0], [1, 0.6, 0],
+                [0, 1, 0], [0.6, 1, 0],
+                [0, 0, 1], [0, 0.6, 1]]).astype(np.float32).T
+            ),
+            g.LineBasicMaterial(vertexColors=True)))
+        v["triad"].set_transform(tf.translation_matrix(([0, 5, 0])))
+
+        v["triad_function"].set_object(g.triad(0.5))
+        v["triad_function"].set_transform(tf.translation_matrix([0, 6, 0]))
 
 
 class TestMeshStreams(VisualizerTest):
