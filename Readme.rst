@@ -63,7 +63,7 @@ Usage
 
 For examples of interactive usage, see demo.ipynb_
 
-.. _demo.ipynb: demo.ipynb
+.. _demo.ipynb: examples/demo.ipynb
 
 Under the Hood
 ==============

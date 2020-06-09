@@ -118,17 +118,26 @@ class Cylinder(Geometry):
         }
 
 
-class MeshMaterial(Material):
+class GenericMaterial(Material):
     def __init__(self, color=0xffffff, reflectivity=0.5, map=None,
-                 side = 2, transparent = None, opacity = 1.0, **kwargs):
-        super(MeshMaterial, self).__init__()
+                 side = 2, transparent = None, opacity = 1.0,
+                 linewidth = 1.0,
+                 wireframe = False,
+                 wireframeLinewidth = 1.0,
+                 vertexColors=False,
+                 **kwargs):
+        super(GenericMaterial, self).__init__()
         self.color = color
         self.reflectivity = reflectivity
         self.map = map
-        self.properties = kwargs
         self.side = side
         self.transparent = transparent
         self.opacity = opacity
+        self.linewidth = linewidth
+        self.wireframe = wireframe
+        self.wireframeLinewidth = wireframeLinewidth
+        self.vertexColors = vertexColors
+        self.properties = kwargs
 
     def lower(self, object_data):
         # Three.js allows a material to have an opacity which is != 1,
@@ -148,7 +157,11 @@ class MeshMaterial(Material):
             u"reflectivity": self.reflectivity,
             u"side": self.side,
             u"transparent": transparent,
-            u"opacity": self.opacity
+            u"opacity": self.opacity,
+            u"linewidth": self.linewidth,
+            u"wireframe": bool(self.wireframe),
+            u"wireframeLinewidth": self.wireframeLinewidth,
+            u"vertexColors": (2 if self.vertexColors else 0),  # three.js wants an enum
         }
         data.update(self.properties)
         if self.map is not None:
@@ -156,20 +169,24 @@ class MeshMaterial(Material):
         return data
 
 
-class MeshBasicMaterial(MeshMaterial):
+class MeshBasicMaterial(GenericMaterial):
     _type=u"MeshBasicMaterial"
 
 
-class MeshPhongMaterial(MeshMaterial):
+class MeshPhongMaterial(GenericMaterial):
     _type=u"MeshPhongMaterial"
 
 
-class MeshLambertMaterial(MeshMaterial):
+class MeshLambertMaterial(GenericMaterial):
     _type=u"MeshLambertMaterial"
 
 
-class MeshToonMaterial(MeshMaterial):
+class MeshToonMaterial(GenericMaterial):
     _type=u"MeshToonMaterial"
+
+
+class LineBasicMaterial(GenericMaterial):
+    _type=u"LineBasicMaterial"
 
 
 class PngImage(Image):
@@ -219,20 +236,6 @@ class ImageTexture(Texture):
             u"image": self.image.lower_in_object(object_data)
         }
         data.update(self.properties)
-        return data
-
-
-class GenericMaterial(Material):
-    def __init__(self, properties):
-        self.properties = properties
-        self.uuid = str(uuid.uuid1())
-
-    def lower(self, object_data):
-        data = {u"uuid": self.uuid}
-        data.update(self.properties)
-        if u"map" in data:
-            texture = data[u"map"]
-            data[u"map"] = texture.lower_in_object(object_data)
         return data
 
 
@@ -484,3 +487,24 @@ class LineSegments(Object):
 
 class LineLoop(Object):
     _type = u"LineLoop"
+
+
+def triad(scale=1.0):
+    """
+    A visual representation of the origin of a coordinate system, drawn as three
+    lines in red, green, and blue along the x, y, and z axes. The `scale` parameter
+    controls the length of the three lines.
+
+    Returns an `Object` which can be passed to `set_object()`
+    """
+    return LineSegments(
+        PointsGeometry(position=np.array([
+            [0, 0, 0], [scale, 0, 0],
+            [0, 0, 0], [0, scale, 0],
+            [0, 0, 0], [0, 0, scale]]).astype(np.float32).T,
+            color=np.array([
+            [1, 0, 0], [1, 0.6, 0],
+            [0, 1, 0], [0.6, 1, 0],
+            [0, 0, 1], [0, 0.6, 1]]).astype(np.float32).T
+        ),
+        LineBasicMaterial(vertexColors=True))
