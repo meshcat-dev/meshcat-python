@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import atexit
+import os
 import sys
 import subprocess
 import webbrowser
@@ -40,7 +41,10 @@ class ViewerWindow:
             if zmq_url is not None:
                 args.append("--zmq-url")
                 args.append(zmq_url)
-            self.server_proc = subprocess.Popen(args, stdout=subprocess.PIPE)
+            # Note: Pass PYTHONPATH to be robust to workflows like Google Colab,
+            # where meshcat might have been added directly via sys.path.append.
+            env = {'PYTHONPATH': os.path.dirname(os.path.dirname(__file__))}
+            self.server_proc = subprocess.Popen(args, stdout=subprocess.PIPE, env=env)
             self.zmq_url = match_zmq_url(self.server_proc.stdout.readline().strip().decode("utf-8"))
             self.web_url = match_web_url(self.server_proc.stdout.readline().strip().decode("utf-8"))
 
