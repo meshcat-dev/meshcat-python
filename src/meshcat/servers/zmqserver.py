@@ -49,11 +49,11 @@ DEFAULT_ZMQ_PORT = 6000
 MESHCAT_COMMANDS = ["set_transform", "set_object", "delete", "set_property", "set_animation"]
 
 
-def find_available_port(func, default_port, max_attempts=MAX_ATTEMPTS):
+def find_available_port(func, default_port, max_attempts=MAX_ATTEMPTS, **kwargs):
     for i in range(max_attempts):
         port = default_port + i
         try:
-            return func(port), port
+            return func(port, **kwargs), port
         except (ADDRESS_IN_USE_ERROR, zmq.error.ZMQError):
             print("Port: {:d} in use, trying another...".format(port), file=sys.stderr)
         except Exception as e:
@@ -103,7 +103,8 @@ class StaticFileHandlerNoCache(tornado.web.StaticFileHandler):
 class ZMQWebSocketBridge(object):
     context = zmq.Context()
 
-    def __init__(self, zmq_url=None, host="127.0.0.1", port=None):
+    def __init__(self, zmq_url=None, host="127.0.0.1", port=None,              
+                 certfile=None, keyfile=None):
         self.host = host
         self.websocket_pool = set()
         self.app = self.make_app()
@@ -116,12 +117,25 @@ class ZMQWebSocketBridge(object):
         else:
             self.zmq_socket, self.zmq_stream, self.zmq_url = self.setup_zmq(zmq_url)
 
+        protocol = "http:"
+        listen_kwargs = {}
+        if certfile is not None or keyfile is not None:
+            if certfile is None:
+                raise(Exception("You must supply a certfile if you supply a keyfile"))
+            if keyfile is None:
+                raise(Exception("You must supply a keyfile if you supply a certfile"))
+
+            listen_kwargs["ssl_options"] = { "certfile": certfile,
+                                             "keyfile": keyfile }
+            protocol = "https:"
+
         if port is None:
-            _, self.fileserver_port = find_available_port(self.app.listen, DEFAULT_FILESERVER_PORT)
+            _, self.fileserver_port = find_available_port(self.app.listen, DEFAULT_FILESERVER_PORT, **listen_kwargs)
         else:
-            self.app.listen(port)
+            self.app.listen(port, **listen_kwargs)
             self.fileserver_port = port
-        self.web_url = "http://{host}:{port}/static/".format(host=self.host, port=self.fileserver_port)
+        self.web_url = "{protocol}//{host}:{port}/static/".format(
+            protocol=protocol, host=self.host, port=self.fileserver_port)
 
         self.tree = SceneTree()
 
@@ -248,8 +262,12 @@ def main():
     parser = argparse.ArgumentParser(description="Serve the MeshCat HTML files and listen for ZeroMQ commands")
     parser.add_argument('--zmq-url', '-z', type=str, nargs="?", default=None)
     parser.add_argument('--open', '-o', action="store_true")
+    parser.add_argument('--certfile', type=str, default=None)
+    parser.add_argument('--keyfile', type=str, default=None)
     results = parser.parse_args()
-    bridge = ZMQWebSocketBridge(zmq_url=results.zmq_url)
+    bridge = ZMQWebSocketBridge(zmq_url=results.zmq_url,
+                                certfile=results.certfile,
+                                keyfile=results.keyfile)
     print("zmq_url={:s}".format(bridge.zmq_url))
     print("web_url={:s}".format(bridge.web_url))
     if results.open:
