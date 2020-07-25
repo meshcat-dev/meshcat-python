@@ -154,6 +154,9 @@ class ZMQWebSocketBridge(object):
                 find_node(self.tree, path).transform = data
             elif cmd == "set_object":
                 find_node(self.tree, path).object = data
+                find_node(self.tree, path).properties = []
+            elif cmd == "set_property":
+                find_node(self.tree, path).properties.append(data)
             elif cmd == "set_animation":
                 find_node(self.tree, path).animation = data
             elif cmd == "delete":
@@ -172,6 +175,8 @@ class ZMQWebSocketBridge(object):
             for node in walk(self.tree):
                 if node.object is not None:
                     drawing_commands += create_command(node.object)
+                for p in node.properties:
+                    drawing_commands += create_command(p)
                 if node.transform is not None:
                     drawing_commands += create_command(node.transform)
                 if node.animation is not None:
@@ -231,6 +236,8 @@ class ZMQWebSocketBridge(object):
         for node in walk(self.tree):
             if node.object is not None:
                 websocket.write_message(node.object, binary=True)
+            for p in node.properties:
+                websocket.write_message(p, binary=True)
             if node.transform is not None:
                 websocket.write_message(node.transform, binary=True)
             if node.animation is not None:
