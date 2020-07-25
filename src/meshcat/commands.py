@@ -55,6 +55,20 @@ class Delete:
             u"path": self.path.lower()
         }
 
+class SetProperty:
+    __slots__ = ["path", "key", "value"]
+    def __init__(self, path, key, value):
+        self.path = path
+        self.key = key
+        self.value = value
+
+    def lower(self):
+        return {
+            u"type": u"set_property",
+            u"path": self.path,
+            u"property": self.key.lower(),
+            u"value": self.value
+        }
 
 class SetAnimation:
     __slots__ = ["animation", "play", "repetitions"]

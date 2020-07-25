@@ -12,6 +12,8 @@ vis.set_object(box)
 
 draw_times = []
 
+vis.set_property("Background", "top_color", [255, 0, 0])
+
 for i in range(200):
     theta = (i + 1) / 100 * 2 * math.pi
     now = time.time()
