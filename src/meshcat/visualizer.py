@@ -1,58 +1,24 @@
 from __future__ import absolute_import, division, print_function
 
-import atexit
-import os
 import sys
-import subprocess
 import webbrowser
 
 import umsgpack
 import numpy as np
 import zmq
-import re
 from IPython.display import HTML
 
 from .path import Path
 from .commands import SetObject, SetTransform, Delete, SetAnimation
 from .geometry import MeshPhongMaterial
-
-
-def capture(pattern, s):
-    match = re.match(pattern, s)
-    if not match:
-        raise ValueError("Could not match {:s} with pattern {:s}".format(s, pattern))
-    else:
-        return match.groups()[0]
-
-def match_zmq_url(line):
-    return capture(r"^zmq_url=(.*)$", line)
-
-def match_web_url(line):
-    return capture(r"^web_url=(.*)$", line)
-
+from .servers.zmqserver import StartZmqServerAsSubprocess
 
 class ViewerWindow:
     context = zmq.Context()
 
-    def __init__(self, zmq_url, start_server, args):
+    def __init__(self, zmq_url, start_server, server_args):
         if start_server:
-            # Need -u for unbuffered output: https://stackoverflow.com/a/25572491
-            args = [sys.executable, "-u", "-m", "meshcat.servers.zmqserver"] + args
-            if zmq_url is not None:
-                args.append("--zmq-url")
-                args.append(zmq_url)
-            # Note: Pass PYTHONPATH to be robust to workflows like Google Colab,
-            # where meshcat might have been added directly via sys.path.append.
-            env = {'PYTHONPATH': os.path.dirname(os.path.dirname(__file__))}
-            self.server_proc = subprocess.Popen(args, stdout=subprocess.PIPE, env=env)
-            self.zmq_url = match_zmq_url(self.server_proc.stdout.readline().strip().decode("utf-8"))
-            self.web_url = match_web_url(self.server_proc.stdout.readline().strip().decode("utf-8"))
-
-            def cleanup():
-                self.server_proc.kill()
-                self.server_proc.wait()
-
-            atexit.register(cleanup)
+            self.server_proc, self.zmq_url, self.web_url = StartZmqServerAsSubprocess(zmq_url=zmq_url, server_args=server_args)
 
         else:
             self.server_proc = None
@@ -69,8 +35,6 @@ class ViewerWindow:
 
         print("You can open the visualizer by visiting the following URL:")
         print(self.web_url)
-
-
 
     def connect_zmq(self):
         self.zmq_socket = self.context.socket(zmq.REQ)
@@ -112,9 +76,9 @@ def srcdoc_escape(x):
 class Visualizer:
     __slots__ = ["window", "path"]
 
-    def __init__(self, zmq_url=None, window=None, args=[]):
+    def __init__(self, zmq_url=None, window=None, server_args=[]):
         if window is None:
-            self.window = ViewerWindow(zmq_url=zmq_url, start_server=(zmq_url is None), args=args)
+            self.window = ViewerWindow(zmq_url=zmq_url, start_server=(zmq_url is None), server_args=server_args)
         else:
             self.window = window
         self.path = Path(("meshcat",))
