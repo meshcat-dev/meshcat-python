@@ -1,8 +1,11 @@
 from __future__ import absolute_import, division, print_function
 
+import atexit
 import base64
 import os
+import re
 import sys
+import subprocess
 import multiprocessing
 from collections import deque
 
@@ -22,6 +25,55 @@ import zmq.eventloop.ioloop
 from zmq.eventloop.zmqstream import ZMQStream
 
 from .tree import SceneTree, walk, find_node
+
+
+def capture(pattern, s):
+    match = re.match(pattern, s)
+    if not match:
+        raise ValueError("Could not match {:s} with pattern {:s}".format(s, pattern))
+    else:
+        return match.groups()[0]
+
+def match_zmq_url(line):
+    return capture(r"^zmq_url=(.*)$", line)
+
+def match_web_url(line):
+    return capture(r"^web_url=(.*)$", line)
+
+def StartZmqServerAsSubprocess(zmq_url=None, server_args=[]):
+    """
+    Starts the ZMQ server as a subprocess, passing *args through popen.
+    Optional Keyword Arguments:
+        zmq_url  
+    """
+    # Need -u for unbuffered output: https://stackoverflow.com/a/25572491
+    args = [sys.executable, "-u", "-m", "meshcat.servers.zmqserver"]
+    if zmq_url is not None:
+        args.append("--zmq-url")
+        args.append(zmq_url)
+    if server_args:
+        args.append(*server_args)
+    # Note: Pass PYTHONPATH to be robust to workflows like Google Colab,
+    # where meshcat might have been added directly via sys.path.append.
+    env = {'PYTHONPATH': os.path.dirname(os.path.dirname(os.path.dirname(__file__)))}
+    kwargs = { 
+        'stdout': subprocess.PIPE,
+        'env': env
+    }
+    # Use start_new_session if it's available. Without it, in jupyter the server
+    # goes down when we cancel execution of any cell in the notebook.
+    if sys.version_info.major >= 3:
+        kwargs['start_new_session'] = True
+    server_proc = subprocess.Popen(args, **kwargs)
+    zmq_url = match_zmq_url(server_proc.stdout.readline().strip().decode("utf-8"))
+    web_url = match_web_url(server_proc.stdout.readline().strip().decode("utf-8"))
+
+    def cleanup(server_proc):
+        server_proc.kill()
+        server_proc.wait()
+
+    atexit.register(cleanup, server_proc)
+    return server_proc, zmq_url, web_url
 
 
 def _zmq_install_ioloop():
@@ -104,7 +156,7 @@ class ZMQWebSocketBridge(object):
     context = zmq.Context()
 
     def __init__(self, zmq_url=None, host="127.0.0.1", port=None,              
-                 certfile=None, keyfile=None):
+                 certfile=None, keyfile=None, ngrok_http_tunnel=False):
         self.host = host
         self.websocket_pool = set()
         self.app = self.make_app()
@@ -136,6 +188,41 @@ class ZMQWebSocketBridge(object):
             self.fileserver_port = port
         self.web_url = "{protocol}//{host}:{port}/static/".format(
             protocol=protocol, host=self.host, port=self.fileserver_port)
+
+        # Note: The (significant) advantage of putting this in here is not only
+        # so that the workflow is convenient, but also so that the server
+        # administers the public web_url when clients ask for it.
+        if ngrok_http_tunnel:
+            if protocol == "https:":
+                # TODO(russt): Consider plumbing ngrok auth through here for
+                # someone who has paid for ngrok and wants to use https.
+                raise(Exception('The free version of ngrok does not support https'))
+
+            # Conditionally import pyngrok
+            try:
+                import pyngrok.conf
+                import pyngrok.ngrok
+
+                kwargs = {}
+                # Use start_new_session if it's available. Without it, in
+                # jupyter the server goes down when we cancel execution of any
+                # cell in the notebook.
+                if sys.version_info.major >= 3:
+                        kwargs['start_new_session'] = True
+                config = pyngrok.conf.PyngrokConfig(**kwargs)
+                self.web_url = pyngrok.ngrok.connect(self.fileserver_port, "http", pyngrok_config=config) + "/static/"
+
+                def cleanup():
+                    pyngrok.ngrok.kill()
+
+                atexit.register(cleanup)
+
+            except ImportError as e:
+                if "pyngrok" in e.__class__.__name__:
+                    raise(Exception("You must install pyngrok (e.g. via `pip install pyngrok`)."))
+            except:
+                raise
+
 
         self.tree = SceneTree()
 
@@ -271,10 +358,14 @@ def main():
     parser.add_argument('--open', '-o', action="store_true")
     parser.add_argument('--certfile', type=str, default=None)
     parser.add_argument('--keyfile', type=str, default=None)
+    parser.add_argument('--ngrok_http_tunnel', action="store_true", help="""    
+ngrok is a service for creating a public URL from your local machine, which 
+is very useful if you would like to make your meshcat server public.""")
     results = parser.parse_args()
     bridge = ZMQWebSocketBridge(zmq_url=results.zmq_url,
                                 certfile=results.certfile,
-                                keyfile=results.keyfile)
+                                keyfile=results.keyfile,
+                                ngrok_http_tunnel=results.ngrok_http_tunnel)
     print("zmq_url={:s}".format(bridge.zmq_url))
     print("web_url={:s}".format(bridge.web_url))
     if results.open:
