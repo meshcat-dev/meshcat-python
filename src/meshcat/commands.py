@@ -4,7 +4,7 @@ import sys
 if sys.version_info >= (3, 0):
     unicode = str
 
-from .geometry import Geometry, Object, Mesh, MeshPhongMaterial, PointsMaterial, Points
+from .geometry import Geometry, Object, Mesh, MeshPhongMaterial, OrthographicCamera, PointsMaterial, Points
 
 class SetObject:
     __slots__ = ["object", "path"]
@@ -12,6 +12,8 @@ class SetObject:
         if isinstance(geometry_or_object, Object):
             if material is not None:
                 raise(ArgumentError("Please supply either an Object OR a Geometry and a Material"))
+            self.object = geometry_or_object
+        elif isinstance(geometry_or_object, OrthographicCamera):
             self.object = geometry_or_object
         else:
             if material is None:
