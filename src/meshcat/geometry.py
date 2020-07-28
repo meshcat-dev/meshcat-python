@@ -270,6 +270,33 @@ class Mesh(Object):
     _type = u"Mesh"
 
 
+class OrthographicCamera(SceneElement):
+    def __init__(self, left, right, top, bottom, near, far, zoom=1):
+        super(OrthographicCamera, self).__init__()
+        self.left = left
+        self.right = right
+        self.top = top
+        self.bottom = bottom
+        self.near = near
+        self.far = far
+        self.zoom = zoom
+    
+    def lower(self):
+        data = {
+            u"object": {
+                u"uuid": self.uuid,
+                u"type": u"OrthographicCamera",
+                u"left": self.left,
+                u"right": self.right,
+                u"top": self.top,
+                u"bottom": self.bottom,
+                u"near": self.near,
+                u"far": self.far,
+                u"zoom": self.zoom,
+            }
+        }
+        return data
+
 def item_size(array):
     if array.ndim == 1:
         return 1
