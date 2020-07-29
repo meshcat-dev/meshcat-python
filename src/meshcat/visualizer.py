@@ -13,7 +13,7 @@ import re
 from IPython.display import HTML
 
 from .path import Path
-from .commands import SetObject, SetTransform, Delete, SetAnimation
+from .commands import SetObject, SetTransform, Delete, SetProperty, SetAnimation
 from .geometry import MeshPhongMaterial
 
 
@@ -175,6 +175,9 @@ class Visualizer:
 
     def set_transform(self, matrix=np.eye(4)):
         return self.window.send(SetTransform(matrix, self.path))
+
+    def set_property(self, key, value):
+        return self.window.send(SetProperty(key, value, self.path))
 
     def set_animation(self, animation, play=True, repetitions=1):
         return self.window.send(SetAnimation(animation, play=play, repetitions=repetitions))
