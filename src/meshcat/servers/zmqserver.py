@@ -40,7 +40,7 @@ def match_zmq_url(line):
 def match_web_url(line):
     return capture(r"^web_url=(.*)$", line)
 
-def StartZmqServerAsSubprocess(zmq_url=None, server_args=[]):
+def start_zmq_server_as_subprocess(zmq_url=None, server_args=[]):
     """
     Starts the ZMQ server as a subprocess, passing *args through popen.
     Optional Keyword Arguments:
@@ -65,7 +65,10 @@ def StartZmqServerAsSubprocess(zmq_url=None, server_args=[]):
     if sys.version_info.major >= 3:
         kwargs['start_new_session'] = True
     server_proc = subprocess.Popen(args, **kwargs)
-    zmq_url = match_zmq_url(server_proc.stdout.readline().strip().decode("utf-8"))
+    line = ""
+    while "zmq_url" not in line:
+        line = server_proc.stdout.readline().strip().decode("utf-8")
+    zmq_url = match_zmq_url(line)
     web_url = match_web_url(server_proc.stdout.readline().strip().decode("utf-8"))
 
     def cleanup(server_proc):
@@ -211,6 +214,7 @@ class ZMQWebSocketBridge(object):
                         kwargs['start_new_session'] = True
                 config = pyngrok.conf.PyngrokConfig(**kwargs)
                 self.web_url = pyngrok.ngrok.connect(self.fileserver_port, "http", pyngrok_config=config) + "/static/"
+                print("\n")  # ensure any pyngrok output is properly terminated.
 
                 def cleanup():
                     pyngrok.ngrok.kill()
