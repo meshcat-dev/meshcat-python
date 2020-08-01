@@ -11,14 +11,15 @@ from IPython.display import HTML
 from .path import Path
 from .commands import SetObject, SetTransform, Delete, SetProperty, SetAnimation
 from .geometry import MeshPhongMaterial
-from .servers.zmqserver import StartZmqServerAsSubprocess
+from .servers.zmqserver import start_zmq_server_as_subprocess
 
 class ViewerWindow:
     context = zmq.Context()
 
     def __init__(self, zmq_url, start_server, server_args):
         if start_server:
-            self.server_proc, self.zmq_url, self.web_url = StartZmqServerAsSubprocess(zmq_url=zmq_url, server_args=server_args)
+            self.server_proc, self.zmq_url, self.web_url = start_zmq_server_as_subprocess(
+                zmq_url=zmq_url, server_args=server_args)
 
         else:
             self.server_proc = None
