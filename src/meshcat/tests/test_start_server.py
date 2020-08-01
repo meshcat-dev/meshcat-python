@@ -15,4 +15,5 @@ class TestStartZmqServer(unittest.TestCase):
 
     def test_ngrok(self):
         proc, zmq_url, web_url = StartZmqServerAsSubprocess( server_args=["--ngrok_http_tunnel"])
+        self.assertIsNotNone(web_url)
         self.assertNotIn("127.0.0.1", web_url)
