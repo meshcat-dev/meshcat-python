@@ -270,3 +270,20 @@ class TestTriangularMesh(VisualizerTest):
             [3, 0, 2]
         ])
         v.set_object(g.TriangularMeshGeometry(vertices, faces), g.MeshLambertMaterial(color=0xeedd22, wireframe=True))
+
+
+class TestOrthographicCamera(VisualizerTest):
+    def runTest(self):
+        """
+        Test that we can set_object with an OrthographicCamera.
+        """
+        self.vis.set_object(g.Box([0.5, 0.5, 0.5]))
+
+        camera = g.OrthographicCamera(
+            left=-1, right=1, bottom=-1, top=1, near=-1000, far=1000)
+        self.vis['/Cameras/default/rotated'].set_object(camera)
+        self.vis['/Cameras/default'].set_transform(
+            tf.translation_matrix([0, -1, 0]))
+        self.vis['/Cameras/default/rotated/<object>'].set_property(
+            "position", [0, 0, 0])
+        self.vis['/Grid'].set_property("visible", False)
