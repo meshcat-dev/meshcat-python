@@ -5,10 +5,11 @@ if sys.version_info >= (3, 0):
     unicode = str
 
 from .geometry import Geometry, Object, Mesh, MeshPhongMaterial, PointsMaterial, Points
+from .path import Path
 
 class SetObject:
     __slots__ = ["object", "path"]
-    def __init__(self, geometry_or_object, material=None, path=[]):
+    def __init__(self, geometry_or_object, material=None, path=None):
         if isinstance(geometry_or_object, Object):
             if material is not None:
                 raise(ArgumentError("Please supply either an Object OR a Geometry and a Material"))
@@ -20,7 +21,10 @@ class SetObject:
                 self.object = Points(geometry_or_object, material)
             else:
                 self.object = Mesh(geometry_or_object, material)
-        self.path = path
+        if path is not None:
+            self.path = path
+        else:
+            self.path = Path()
 
     def lower(self):
         return {
@@ -32,7 +36,7 @@ class SetObject:
 
 class SetTransform:
     __slots__ = ["matrix", "path"]
-    def __init__(self, matrix, path=[]):
+    def __init__(self, matrix, path):
         self.matrix = matrix
         self.path = path
 
@@ -57,7 +61,7 @@ class Delete:
 
 class SetProperty:
     __slots__ = ["path", "key", "value"]
-    def __init__(self, key, value, path=[]):
+    def __init__(self, key, value, path):
         self.key = key
         self.value = value
         self.path = path
