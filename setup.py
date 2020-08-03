@@ -22,7 +22,8 @@ setup(name="meshcat",
       "u-msgpack-python >= 2.4.1",
       "numpy >= 1.14.0" if sys.version_info >= (3, 0) else "numpy >= 1.14.0, < 1.17",
       "tornado >= 4.0.0" if sys.version_info >= (3, 0) else "tornado >= 4.0.0, < 6.0",
-      "pyzmq >= 17.0.0"
+      "pyzmq >= 17.0.0",
+      "pyngrok >= 4.1.6"
     ],
     zip_safe=False,
     include_package_data=True
