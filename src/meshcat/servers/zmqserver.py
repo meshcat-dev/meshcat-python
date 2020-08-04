@@ -7,7 +7,6 @@ import re
 import sys
 import subprocess
 import multiprocessing
-from collections import deque
 
 if sys.version_info >= (3, 0):
     ADDRESS_IN_USE_ERROR = OSError
