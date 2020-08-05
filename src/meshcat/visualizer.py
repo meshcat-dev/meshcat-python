@@ -6,7 +6,7 @@ import webbrowser
 import umsgpack
 import numpy as np
 import zmq
-from IPython.display import HTML
+from IPython.display import HTML, display
 
 from .path import Path
 from .commands import SetObject, SetTransform, Delete, SetProperty, SetAnimation
@@ -106,15 +106,12 @@ class Visualizer:
     def jupyter_cell(self):
         """
         Render the visualizer in a jupyter notebook or jupyterlab cell.
-
-        For this to work, it should be the very last command in the given jupyter
-        cell.
         """
-        return HTML("""
+        return display(HTML("""
             <div style="height: 400px; width: 100%; overflow-x: auto; overflow-y: hidden; resize: both">
             <iframe src="{url}" style="width: 100%; height: 100%; border: none"></iframe>
             </div>
-            """.format(url=self.url()))
+            """.format(url=self.url())))
 
     def render_static(self):
         """
@@ -126,11 +123,11 @@ class Visualizer:
         Note: this method should work well even when your jupyter kernel is running
         on a different machine or inside a container.
         """
-        return HTML("""
+        return display(HTML("""
         <div style="height: 400px; width: 100%; overflow-x: auto; overflow-y: hidden; resize: both">
         <iframe srcdoc="{srcdoc}" style="width: 100%; height: 100%; border: none"></iframe>
         </div>
-        """.format(srcdoc=srcdoc_escape(self.static_html())))
+        """.format(srcdoc=srcdoc_escape(self.static_html()))))
 
     def __getitem__(self, path):
         return Visualizer.view_into(self.window, self.path.append(path))
