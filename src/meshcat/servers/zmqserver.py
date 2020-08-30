@@ -250,7 +250,12 @@ class ZMQWebSocketBridge(object):
                 return
             path = list(filter(lambda x: len(x) > 0, frames[1].decode("utf-8").split("/")))
             data = frames[2]
-            self.forward_to_websockets(frames)
+            # Support caching of objects (note: even UUIDs have to match).
+            cache_hit = (cmd == "set_object" and 
+                         find_node(self.tree, path).object and 
+                         find_node(self.tree, path).object == data)
+            if not cache_hit:
+                self.forward_to_websockets(frames)
             if cmd == "set_transform":
                 find_node(self.tree, path).transform = data
             elif cmd == "set_object":
