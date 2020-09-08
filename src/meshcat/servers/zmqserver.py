@@ -373,7 +373,14 @@ def main():
     import argparse
     import sys
     import webbrowser
+    import platform
+    import asyncio
 
+    # Fix for ZMQ crash on Windows. This allows starting up the
+    # meshcat server but example script which start their own fail
+    if sys.version_info >= (3, 8) and platform.system():
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    
     parser = argparse.ArgumentParser(description="Serve the MeshCat HTML files and listen for ZeroMQ commands")
     parser.add_argument('--zmq-url', '-z', type=str, nargs="?", default=None)
     parser.add_argument('--open', '-o', action="store_true")
