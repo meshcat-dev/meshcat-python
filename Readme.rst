@@ -44,7 +44,7 @@ Ubuntu/Debian:
 
 ::
 
-    apt-get install libzmq3
+    apt install libzmq3-dev
 
 Homebrew:
 
@@ -52,12 +52,18 @@ Homebrew:
 
     brew install zmq
 
+Windows:
+
+Download the official installer from zeromq.org_.
+
+.. _zeromq.org: https://zeromq.org/download/
+
 Usage
 =====
 
 For examples of interactive usage, see demo.ipynb_
 
-.. _demo.ipynb: demo.ipynb
+.. _demo.ipynb: examples/demo.ipynb
 
 Under the Hood
 ==============
