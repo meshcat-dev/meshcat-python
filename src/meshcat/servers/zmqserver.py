@@ -54,7 +54,12 @@ def start_zmq_server_as_subprocess(zmq_url=None, server_args=[]):
         args.append(*server_args)
     # Note: Pass PYTHONPATH to be robust to workflows like Google Colab,
     # where meshcat might have been added directly via sys.path.append.
-    env = {'PYTHONPATH': os.path.dirname(os.path.dirname(os.path.dirname(__file__)))}
+    # Copy existing environmental variables as some of them might be needed
+    # e.g. on Windows SYSTEMROOT and PATH
+    env = os.environ
+    my_env = {
+        'PYTHONPATH': os.path.dirname(os.path.dirname(os.path.dirname(__file__)))}
+    env.update(my_env)
     kwargs = { 
         'stdout': subprocess.PIPE,
         'stderr': subprocess.PIPE,
