@@ -57,6 +57,7 @@ def start_zmq_server_as_subprocess(zmq_url=None, server_args=[]):
     env = {'PYTHONPATH': os.path.dirname(os.path.dirname(os.path.dirname(__file__)))}
     kwargs = { 
         'stdout': subprocess.PIPE,
+        'stderr': subprocess.PIPE,
         'env': env
     }
     # Use start_new_session if it's available. Without it, in jupyter the server
@@ -67,6 +68,11 @@ def start_zmq_server_as_subprocess(zmq_url=None, server_args=[]):
     line = ""
     while "zmq_url" not in line:
         line = server_proc.stdout.readline().strip().decode("utf-8")
+        if server_proc.poll() is not None:
+            outs, errs = server_proc.communicate()
+            print(outs.decode("utf-8"))
+            print(errs.decode("utf-8"))
+            raise RuntimeError("the meshcat server process exited prematurely with exit code " + str(server_proc.poll()))
     zmq_url = match_zmq_url(line)
     web_url = match_web_url(server_proc.stdout.readline().strip().decode("utf-8"))
 
