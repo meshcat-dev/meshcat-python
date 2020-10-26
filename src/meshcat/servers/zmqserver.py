@@ -218,9 +218,14 @@ class ZMQWebSocketBridge(object):
                 if sys.version_info.major >= 3:
                         kwargs['start_new_session'] = True
                 config = pyngrok.conf.PyngrokConfig(**kwargs)
-                self.web_url = pyngrok.ngrok.connect(self.fileserver_port, "http", pyngrok_config=config) + "/static/"
-                print("\n")  # ensure any pyngrok output is properly terminated.
+                self.web_url = pyngrok.ngrok.connect(self.fileserver_port, "http", pyngrok_config=config)
 
+                # pyngrok >= 5.0.0 returns an NgrokTunnel object instead of the string.
+                if not isinstance(self.web_url, str):
+                    self.web_url = self.web_url.public_url.rstrip()
+                self.web_url += "/static/"
+
+                print("\n")  # ensure any pyngrok output is properly terminated.
                 def cleanup():
                     pyngrok.ngrok.kill()
 
