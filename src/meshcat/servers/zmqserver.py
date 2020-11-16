@@ -43,7 +43,7 @@ def start_zmq_server_as_subprocess(zmq_url=None, server_args=[]):
     """
     Starts the ZMQ server as a subprocess, passing *args through popen.
     Optional Keyword Arguments:
-        zmq_url  
+        zmq_url
     """
     # Need -u for unbuffered output: https://stackoverflow.com/a/25572491
     args = [sys.executable, "-u", "-m", "meshcat.servers.zmqserver"]
@@ -166,7 +166,7 @@ class StaticFileHandlerNoCache(tornado.web.StaticFileHandler):
 class ZMQWebSocketBridge(object):
     context = zmq.Context()
 
-    def __init__(self, zmq_url=None, host="127.0.0.1", port=None,              
+    def __init__(self, zmq_url=None, host="127.0.0.1", port=None,
                  certfile=None, keyfile=None, ngrok_http_tunnel=False):
         self.host = host
         self.websocket_pool = set()
@@ -267,8 +267,8 @@ class ZMQWebSocketBridge(object):
             path = list(filter(lambda x: len(x) > 0, frames[1].decode("utf-8").split("/")))
             data = frames[2]
             # Support caching of objects (note: even UUIDs have to match).
-            cache_hit = (cmd == "set_object" and 
-                         find_node(self.tree, path).object and 
+            cache_hit = (cmd == "set_object" and
+                         find_node(self.tree, path).object and
                          find_node(self.tree, path).object == data)
             if not cache_hit:
                 self.forward_to_websockets(frames)
@@ -376,18 +376,18 @@ def main():
     import platform
     import asyncio
 
-    # Fix for ZMQ crash on Windows. This allows starting up the
-    # meshcat server but example script which start their own fail
+    # Fix asyncio configuration on Windows for Python 3.8 and above.
+    # Workaround for https://github.com/tornadoweb/tornado/issues/2608
     if sys.version_info >= (3, 8) and platform.system() == 'Windows':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    
+
     parser = argparse.ArgumentParser(description="Serve the MeshCat HTML files and listen for ZeroMQ commands")
     parser.add_argument('--zmq-url', '-z', type=str, nargs="?", default=None)
     parser.add_argument('--open', '-o', action="store_true")
     parser.add_argument('--certfile', type=str, default=None)
     parser.add_argument('--keyfile', type=str, default=None)
-    parser.add_argument('--ngrok_http_tunnel', action="store_true", help="""    
-ngrok is a service for creating a public URL from your local machine, which 
+    parser.add_argument('--ngrok_http_tunnel', action="store_true", help="""
+ngrok is a service for creating a public URL from your local machine, which
 is very useful if you would like to make your meshcat server public.""")
     results = parser.parse_args()
     bridge = ZMQWebSocketBridge(zmq_url=results.zmq_url,
