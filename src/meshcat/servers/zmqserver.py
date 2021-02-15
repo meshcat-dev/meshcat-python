@@ -359,6 +359,13 @@ def main():
     import argparse
     import sys
     import webbrowser
+    import platform
+    import asyncio
+
+    # Fix asyncio configuration on Windows for Python 3.8 and above.
+    # Workaround for https://github.com/tornadoweb/tornado/issues/2608
+    if sys.version_info >= (3, 8) and platform.system() == 'Windows':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     parser = argparse.ArgumentParser(description="Serve the MeshCat HTML files and listen for ZeroMQ commands")
     parser.add_argument('--zmq-url', '-z', type=str, nargs="?", default=None)
