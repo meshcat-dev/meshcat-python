@@ -23,6 +23,8 @@ The MeshCat architecture is based on the model used by Jupyter_:
 Installation
 ------------
 
+The latest version of MeshCat requires Python 3.6 or above.
+
 Using pip:
 
 ::

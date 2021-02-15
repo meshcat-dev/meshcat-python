@@ -1,17 +1,6 @@
-from __future__ import absolute_import, division, print_function
-
-import sys
 import base64
 import uuid
-
-if sys.version_info >= (3, 0):
-    unicode = str
-    from io import StringIO, BytesIO
-else:
-    from StringIO import StringIO
-    BytesIO = StringIO
-
-
+from io import StringIO, BytesIO
 import umsgpack
 import numpy as np
 
@@ -20,7 +9,7 @@ from . import transformations as tf
 
 class SceneElement(object):
     def __init__(self):
-        self.uuid = unicode(uuid.uuid1())
+        self.uuid = str(uuid.uuid1())
 
 
 class ReferenceSceneElement(SceneElement):
@@ -202,7 +191,7 @@ class PngImage(Image):
     def lower(self, object_data):
         return {
             u"uuid": self.uuid,
-            u"url": unicode("data:image/png;base64," + base64.b64encode(self.data).decode('ascii'))
+            u"url": str("data:image/png;base64," + base64.b64encode(self.data).decode('ascii'))
         }
 
 
@@ -280,7 +269,7 @@ class OrthographicCamera(SceneElement):
         self.near = near
         self.far = far
         self.zoom = zoom
-    
+
     def lower(self):
         data = {
             u"object": {
@@ -332,15 +321,12 @@ def pack_numpy_array(x):
 
 
 def data_from_stream(stream):
-    if sys.version_info >= (3, 0):
-        if isinstance(stream, BytesIO):
-            data = stream.read().decode(encoding='utf-8')
-        elif isinstance(stream, StringIO):
-            data = stream.read()
-        else:
-            raise ValueError('Stream must be instance of StringIO or BytesIO, not {}'.format(type(stream)))
-    else:
+    if isinstance(stream, BytesIO):
+        data = stream.read().decode(encoding='utf-8')
+    elif isinstance(stream, StringIO):
         data = stream.read()
+    else:
+        raise ValueError('Stream must be instance of StringIO or BytesIO, not {}'.format(type(stream)))
     return data
 
 
@@ -401,15 +387,12 @@ class StlMeshGeometry(MeshGeometry):
 
     @staticmethod
     def from_stream(f):
-        if sys.version_info >= (3, 0):
-            if isinstance(f, BytesIO):
-                arr  = np.frombuffer(f.read(), dtype=np.uint8)
-            elif isinstance(f, StringIO):
-                arr = np.frombuffer(bytes(f.read(), "utf-8"), dtype=np.uint8)
-            else:
-                raise ValueError('Stream must be instance of StringIO or BytesIO, not {}'.format(type(f)))
-        else:
+        if isinstance(f, BytesIO):
             arr  = np.frombuffer(f.read(), dtype=np.uint8)
+        elif isinstance(f, StringIO):
+            arr = np.frombuffer(bytes(f.read(), "utf-8"), dtype=np.uint8)
+        else:
+            raise ValueError('Stream must be instance of StringIO or BytesIO, not {}'.format(type(f)))
         _, extcode = threejs_type(np.uint8)
         encoded = umsgpack.Ext(extcode, arr.tobytes())
         return MeshGeometry(encoded, u"stl")

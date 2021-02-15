@@ -8,12 +8,6 @@ import sys
 import subprocess
 import multiprocessing
 
-if sys.version_info >= (3, 0):
-    ADDRESS_IN_USE_ERROR = OSError
-else:
-    import socket
-    ADDRESS_IN_USE_ERROR = socket.error
-
 import tornado.web
 import tornado.ioloop
 import tornado.websocket
@@ -43,7 +37,7 @@ def start_zmq_server_as_subprocess(zmq_url=None, server_args=[]):
     """
     Starts the ZMQ server as a subprocess, passing *args through popen.
     Optional Keyword Arguments:
-        zmq_url  
+        zmq_url
     """
     # Need -u for unbuffered output: https://stackoverflow.com/a/25572491
     args = [sys.executable, "-u", "-m", "meshcat.servers.zmqserver"]
@@ -58,16 +52,13 @@ def start_zmq_server_as_subprocess(zmq_url=None, server_args=[]):
     # e.g. on Windows SYSTEMROOT and PATH
     env = dict(os.environ)
     env["PYTHONPATH"] = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    kwargs = {
-        'stdout': subprocess.PIPE,
-        'stderr': subprocess.PIPE,
-        'env': env
-    }
     # Use start_new_session if it's available. Without it, in jupyter the server
     # goes down when we cancel execution of any cell in the notebook.
-    if sys.version_info.major >= 3:
-        kwargs['start_new_session'] = True
-    server_proc = subprocess.Popen(args, **kwargs)
+    server_proc = subprocess.Popen(args,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env=env,
+        start_new_session=True)
     line = ""
     while "zmq_url" not in line:
         line = server_proc.stdout.readline().strip().decode("utf-8")
@@ -117,7 +108,7 @@ def find_available_port(func, default_port, max_attempts=MAX_ATTEMPTS, **kwargs)
         port = default_port + i
         try:
             return func(port, **kwargs), port
-        except (ADDRESS_IN_USE_ERROR, zmq.error.ZMQError):
+        except (OSError, zmq.error.ZMQError):
             print("Port: {:d} in use, trying another...".format(port), file=sys.stderr)
         except Exception as e:
             print(type(e))
@@ -166,7 +157,7 @@ class StaticFileHandlerNoCache(tornado.web.StaticFileHandler):
 class ZMQWebSocketBridge(object):
     context = zmq.Context()
 
-    def __init__(self, zmq_url=None, host="127.0.0.1", port=None,              
+    def __init__(self, zmq_url=None, host="127.0.0.1", port=None,
                  certfile=None, keyfile=None, ngrok_http_tunnel=False):
         self.host = host
         self.websocket_pool = set()
@@ -214,19 +205,14 @@ class ZMQWebSocketBridge(object):
                 import pyngrok.conf
                 import pyngrok.ngrok
 
-                kwargs = {}
                 # Use start_new_session if it's available. Without it, in
                 # jupyter the server goes down when we cancel execution of any
                 # cell in the notebook.
-                if sys.version_info.major >= 3:
-                        kwargs['start_new_session'] = True
-                config = pyngrok.conf.PyngrokConfig(**kwargs)
+                config = pyngrok.conf.PyngrokConfig(start_new_session=True)
                 self.web_url = pyngrok.ngrok.connect(self.fileserver_port, "http", pyngrok_config=config)
 
                 # pyngrok >= 5.0.0 returns an NgrokTunnel object instead of the string.
-                if sys.version_info.major < 3:
-                    self.web_url = self.web_url.decode("utf-8")
-                elif not isinstance(self.web_url, str):
+                if not isinstance(self.web_url, str):
                     self.web_url = self.web_url.public_url
                 self.web_url += "/static/"
 
@@ -267,8 +253,8 @@ class ZMQWebSocketBridge(object):
             path = list(filter(lambda x: len(x) > 0, frames[1].decode("utf-8").split("/")))
             data = frames[2]
             # Support caching of objects (note: even UUIDs have to match).
-            cache_hit = (cmd == "set_object" and 
-                         find_node(self.tree, path).object and 
+            cache_hit = (cmd == "set_object" and
+                         find_node(self.tree, path).object and
                          find_node(self.tree, path).object == data)
             if not cache_hit:
                 self.forward_to_websockets(frames)
@@ -379,8 +365,8 @@ def main():
     parser.add_argument('--open', '-o', action="store_true")
     parser.add_argument('--certfile', type=str, default=None)
     parser.add_argument('--keyfile', type=str, default=None)
-    parser.add_argument('--ngrok_http_tunnel', action="store_true", help="""    
-ngrok is a service for creating a public URL from your local machine, which 
+    parser.add_argument('--ngrok_http_tunnel', action="store_true", help="""
+ngrok is a service for creating a public URL from your local machine, which
 is very useful if you would like to make your meshcat server public.""")
     results = parser.parse_args()
     bridge = ZMQWebSocketBridge(zmq_url=results.zmq_url,

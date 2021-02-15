@@ -1,8 +1,4 @@
-from __future__ import absolute_import, division, print_function
-
-import sys
 import webbrowser
-
 import umsgpack
 import numpy as np
 import zmq

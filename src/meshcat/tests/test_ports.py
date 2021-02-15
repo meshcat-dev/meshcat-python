@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import unittest
 import os
 import subprocess
@@ -11,7 +9,7 @@ import meshcat.geometry as g
 
 class TestPortScan(unittest.TestCase):
     """
-    Test that the ZMQ server can correctly handle its default ports 
+    Test that the ZMQ server can correctly handle its default ports
     already being in use.
     """
 

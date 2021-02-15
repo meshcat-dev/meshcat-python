@@ -1,9 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
-import sys
-if sys.version_info >= (3, 0):
-    unicode = str
-
 from .geometry import Geometry, Object, Mesh, MeshPhongMaterial, OrthographicCamera, PointsMaterial, Points
 from .path import Path
 
