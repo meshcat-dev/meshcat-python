@@ -1,10 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
-import sys
-if sys.version_info >= (3, 0):
-    unicode = str
-
-
 class Path(object):
     __slots__ = ["entries"]
 
@@ -21,7 +14,7 @@ class Path(object):
         return Path(new_path)
 
     def lower(self):
-        return unicode("/" + "/".join(self.entries))
+        return "/" + "/".join(self.entries)
 
     def __hash__(self):
         return hash(self.entries)

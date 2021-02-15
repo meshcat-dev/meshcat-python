@@ -1,9 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
-import sys
-if sys.version_info >= (3, 0):
-    unicode = str
-
 from .geometry import Geometry, Object, Mesh, MeshPhongMaterial, OrthographicCamera, PointsMaterial, Points
 from .path import Path
 
@@ -13,7 +7,7 @@ class SetObject:
     def __init__(self, geometry_or_object, material=None, path=None):
         if isinstance(geometry_or_object, Object):
             if material is not None:
-                raise(ArgumentError("Please supply either an Object OR a Geometry and a Material"))
+                raise(ValueError("Please supply either an Object OR a Geometry and a Material"))
             self.object = geometry_or_object
         elif isinstance(geometry_or_object, OrthographicCamera):
             self.object = geometry_or_object

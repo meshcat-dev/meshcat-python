@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import unittest
 
 from meshcat.servers.zmqserver import start_zmq_server_as_subprocess

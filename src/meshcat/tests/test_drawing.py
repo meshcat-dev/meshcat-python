@@ -1,16 +1,10 @@
-from __future__ import absolute_import, division, print_function
-
 import unittest
 import subprocess
 import sys
 import tempfile
 import os
 
-if sys.version_info >= (3, 0):
-    from io import StringIO, BytesIO
-else:
-    from StringIO import StringIO
-    BytesIO = StringIO
+from io import StringIO, BytesIO
 
 import io
 

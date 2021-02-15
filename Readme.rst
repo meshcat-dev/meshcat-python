@@ -1,8 +1,8 @@
 meshcat-python: Python Bindings to the MeshCat WebGL viewer
 ===========================================================
 
-.. image:: https://travis-ci.org/rdeits/meshcat-python.svg?branch=master
-    :target: https://travis-ci.org/rdeits/meshcat-python
+.. image:: https://github.com/rdeits/meshcat-python/workflows/CI/badge.svg?branch=master
+    :target: https://github.com/rdeits/meshcat-python/actions?query=workflow%3ACI
 .. image:: https://codecov.io/gh/rdeits/meshcat-python/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/rdeits/meshcat-python
 
@@ -22,6 +22,8 @@ The MeshCat architecture is based on the model used by Jupyter_:
 
 Installation
 ------------
+
+The latest version of MeshCat requires Python 3.6 or above.
 
 Using pip:
 

@@ -2,6 +2,8 @@
 2. Create a new tag:
 
     git tag -a "v1.2.3"
+    git push
+    git push --tags
 
 3. Upload
 

@@ -1,12 +1,7 @@
-from __future__ import absolute_import, division, print_function
-
 import tempfile
 import tarfile
-import sys
 import os.path
 import subprocess
-if sys.version_info >= (3, 0):
-    unicode = str
 
 import bisect
 from . import transformations as tf
@@ -34,8 +29,8 @@ class AnimationTrack(object):
 
     def lower(self):
         return {
-            u"name": unicode("." + self.name),
-            u"type": unicode(self.jstype),
+            u"name": str("." + self.name),
+            u"type": str(self.jstype),
             u"keys": [{
                 u"time": self.frames[i],
                 u"value": self.values[i]
@@ -63,7 +58,7 @@ class AnimationClip(object):
     def lower(self):
         return {
             u"fps": self.fps,
-            u"name": unicode(self.name),
+            u"name": str(self.name),
             u"tracks": [t.lower() for t in self.tracks.values()]
         }
 
