@@ -21,7 +21,7 @@ async def handle_new_connection(websocket, path):
             msg = await my_queue.get()
             await websocket.send(msg)
     except websockets.ConnectionClosed as e:
-        queues.remove(queue)
+        queues.remove(my_queue)
 
 start_server = websockets.serve(handle_new_connection, '127.0.0.1', 8765)
 asyncio.get_event_loop().run_until_complete(start_server)

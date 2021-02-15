@@ -7,7 +7,7 @@ class SetObject:
     def __init__(self, geometry_or_object, material=None, path=None):
         if isinstance(geometry_or_object, Object):
             if material is not None:
-                raise(ArgumentError("Please supply either an Object OR a Geometry and a Material"))
+                raise(ValueError("Please supply either an Object OR a Geometry and a Material"))
             self.object = geometry_or_object
         elif isinstance(geometry_or_object, OrthographicCamera):
             self.object = geometry_or_object
