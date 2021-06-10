@@ -417,9 +417,13 @@ class StlMeshGeometry(MeshGeometry):
 
 class TriangularMeshGeometry(Geometry):
     """
-    A mesh consisting of an arbitrary collection of triangular faces. To construct one, you need to pass in a collection of vertices as an Nx3 array and a collection of faces as an Mx3 array. Each element of `faces` should be a collection of 3 indices into the `vertices` array.
+    A mesh consisting of an arbitrary collection of triangular faces. To
+    construct one, you need to pass in a collection of vertices as an Nx3 array
+    and a collection of faces as an Mx3 array. Each element of `faces` should
+    be a collection of 3 indices into the `vertices` array.
 
-    For example, to create a square made out of two adjacent triangles, we could do:
+    For example, to create a square made out of two adjacent triangles, we
+    could do:
 
     vertices = np.array([
         [0, 0, 0],  # the first vertex is at [0, 0, 0]
@@ -433,9 +437,14 @@ class TriangularMeshGeometry(Geometry):
     ])
 
     mesh = TriangularMeshGeometry(vertices, faces)
+
+    To set the color of the mesh by vertex, pass an Nx3 array containing the
+    RGB values (in range [0,1]) of the vertices to the optional `color`
+    argument, and set `vertexColors=True` in the Material.
     """
     __slots__ = ["vertices", "faces"]
-    def __init__(self, vertices, faces):
+
+    def __init__(self, vertices, faces, color=None):
         super(TriangularMeshGeometry, self).__init__()
 
         vertices = np.asarray(vertices, dtype=np.float32)
@@ -444,15 +453,20 @@ class TriangularMeshGeometry(Geometry):
         assert faces.shape[1] == 3, "`faces` must be an Mx3 array"
         self.vertices = vertices
         self.faces = faces
+        if color is not None:
+            color = np.asarray(color, dtype=np.float32)
+            assert np.array_equal(vertices.shape, color.shape), "`color` must be the same shape as vertices"
+        self.color = color
 
     def lower(self, object_data):
+        attrs = {u"position": pack_numpy_array(self.vertices.T)}
+        if self.color is not None:
+            attrs[u"color"] = pack_numpy_array(self.color.T)
         return {
             u"uuid": self.uuid,
             u"type": u"BufferGeometry",
             u"data": {
-                u"attributes": {
-                    u"position": pack_numpy_array(self.vertices.T)
-                },
+                u"attributes": attrs,
                 u"index": pack_numpy_array(self.faces.T)
             }
         }
