@@ -265,6 +265,11 @@ class TestTriangularMesh(VisualizerTest):
         ])
         v.set_object(g.TriangularMeshGeometry(vertices, faces), g.MeshLambertMaterial(color=0xeedd22, wireframe=True))
 
+        v = self.vis["triangular_mesh_w_vertex_coloring"]
+        v.set_transform(tf.translation_matrix([1, 0, 0]).dot(tf.rotation_matrix(np.pi/2, [0, 0, 1])))
+        colors = vertices
+        v.set_object(g.TriangularMeshGeometry(vertices, faces, colors), g.MeshLambertMaterial(vertexColors=True, wireframe=True))
+
 
 class TestOrthographicCamera(VisualizerTest):
     def runTest(self):
