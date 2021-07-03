@@ -68,7 +68,6 @@ class ViewerWindow:
     def get_image(self, save_path=""):
         import io
         from PIL import Image
-        import base64
         cmd_data = CaptureImage(save_path).lower()
         self.zmq_socket.send_multipart([
             cmd_data["type"].encode("utf-8"),
@@ -76,7 +75,6 @@ class ViewerWindow:
             umsgpack.packb(cmd_data)
         ])
         img_bytes = self.zmq_socket.recv()
-        return img_bytes
         img = Image.open(io.BytesIO(img_bytes))
         return img
 

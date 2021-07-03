@@ -119,10 +119,8 @@ def find_available_port(func, default_port, max_attempts=MAX_ATTEMPTS, **kwargs)
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def __init__(self, *args, **kwargs):
-        from queue import Queue
         self.bridge = kwargs.pop("bridge")
         super(WebSocketHandler, self).__init__(*args, **kwargs)
-        self.data_store = Queue(50)
 
     def open(self):
         self.bridge.websocket_pool.add(self)
@@ -133,9 +131,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         try:
             import json
             message = json.loads(message)
-            if self.data_store.qsize() >= self.data_store.maxsize:
-                self.data_store.get_nowait()
-            self.data_store.put_nowait(message)
+            self.bridge.send_image(message['data'])
             return
         except Exception as err:
             print(err)
@@ -257,22 +253,6 @@ class ZMQWebSocketBridge(object):
         img_bytes = base64.b64decode(img_code)
         self.zmq_stream.send(img_bytes)
 
-    def ws_receive_image_process_data(self):
-        import queue
-        for ws in self.websocket_pool:
-            ws: WebSocketHandler
-            try:
-                msg = ws.data_store.get(block=False)
-                data = msg['data']
-                self.send_image(data)
-                return data
-            except queue.Empty:
-                delay = 0.01
-                self.ioloop.call_later(delay, self.ws_receive_image_process_data)
-            except Exception as err:
-                raise
-            continue
-
     def handle_zmq(self, frames):
         cmd = frames[0].decode("utf-8")
         if cmd == "url":
@@ -282,8 +262,7 @@ class ZMQWebSocketBridge(object):
         elif cmd == "capture_image":
             save_path = frames[1].decode("utf-8")
             if len(self.websocket_pool) > 0:
-                self.forward_to_websockets(frames)
-                self.ws_receive_image_process_data()
+                self.forward_to_websockets(frames)  # on_message callback should handle the pb
             else:
                 self.ioloop.call_later(0.3, lambda: self.handle_zmq(frames))
         elif cmd in MESHCAT_COMMANDS:
