@@ -44,6 +44,17 @@ class SetTransform:
             u"matrix": list(self.matrix.T.flatten())
         }
 
+class CaptureImage:
+    __slots__ = ["save_path"]
+    def __init__(self, save_path=""):
+        self.save_path = save_path
+
+    def lower(self):
+        return {
+            u"type": u"capture_image",
+            u"save_path": self.save_path.lower()
+        }
+
 
 class Delete:
     __slots__ = ["path"]
