@@ -2,7 +2,10 @@ import webbrowser
 import umsgpack
 import numpy as np
 import zmq
+import io
+from PIL import Image        
 from IPython.display import HTML
+
 
 from .path import Path
 from .commands import SetObject, SetTransform, Delete, SetProperty, SetAnimation, CaptureImage
@@ -66,8 +69,6 @@ class ViewerWindow:
         return self.zmq_socket.recv().decode('utf-8')
 
     def get_image(self, save_path=""):
-        import io
-        from PIL import Image
         cmd_data = CaptureImage(save_path).lower()
         self.zmq_socket.send_multipart([
             cmd_data["type"].encode("utf-8"),

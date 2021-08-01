@@ -7,6 +7,7 @@ import re
 import sys
 import subprocess
 import multiprocessing
+import json
 
 import tornado.web
 import tornado.ioloop
@@ -129,7 +130,6 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         try:
-            import json
             message = json.loads(message)
             self.bridge.send_image(message['data'])
             return
