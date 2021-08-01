@@ -68,11 +68,11 @@ class ViewerWindow:
         # we receive the HTML as utf-8-encoded, so decode here
         return self.zmq_socket.recv().decode('utf-8')
 
-    def get_image(self, save_path=""):
-        cmd_data = CaptureImage(save_path).lower()
+    def get_image(self):
+        cmd_data = CaptureImage().lower()
         self.zmq_socket.send_multipart([
             cmd_data["type"].encode("utf-8"),
-            cmd_data["save_path"].encode("utf-8"),
+            "".encode("utf-8"),
             umsgpack.packb(cmd_data)
         ])
         img_bytes = self.zmq_socket.recv()
@@ -158,9 +158,9 @@ class Visualizer:
     def set_animation(self, animation, play=True, repetitions=1):
         return self.window.send(SetAnimation(animation, play=play, repetitions=repetitions))
 
-    def get_image(self, save_path=""):
+    def get_image(self):
         """Save an image"""
-        return self.window.get_image(save_path)
+        return self.window.get_image()
 
     def delete(self):
         return self.window.send(Delete(self.path))

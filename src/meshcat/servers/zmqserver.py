@@ -260,7 +260,6 @@ class ZMQWebSocketBridge(object):
         elif cmd == "wait":
             self.ioloop.add_callback(self.wait_for_websockets)
         elif cmd == "capture_image":
-            save_path = frames[1].decode("utf-8")
             if len(self.websocket_pool) > 0:
                 self.forward_to_websockets(frames)  # on_message callback should handle the pb
             else:
