@@ -100,7 +100,6 @@ class Visualizer:
         vis.path = path
         return vis
 
-        viewer = meshcat.Visualizer()
     def open(self):
         self.window.open()
         return self
