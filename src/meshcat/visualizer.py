@@ -2,10 +2,13 @@ import webbrowser
 import umsgpack
 import numpy as np
 import zmq
+import io
+from PIL import Image        
 from IPython.display import HTML
 
+
 from .path import Path
-from .commands import SetObject, SetTransform, Delete, SetProperty, SetAnimation
+from .commands import SetObject, SetTransform, Delete, SetProperty, SetAnimation, CaptureImage
 from .geometry import MeshPhongMaterial
 from .servers.zmqserver import start_zmq_server_as_subprocess
 
@@ -64,6 +67,17 @@ class ViewerWindow:
         self.zmq_socket.send(b"get_scene")
         # we receive the HTML as utf-8-encoded, so decode here
         return self.zmq_socket.recv().decode('utf-8')
+
+    def get_image(self):
+        cmd_data = CaptureImage().lower()
+        self.zmq_socket.send_multipart([
+            cmd_data["type"].encode("utf-8"),
+            "".encode("utf-8"),
+            umsgpack.packb(cmd_data)
+        ])
+        img_bytes = self.zmq_socket.recv()
+        img = Image.open(io.BytesIO(img_bytes))
+        return img
 
 
 def srcdoc_escape(x):
@@ -142,6 +156,10 @@ class Visualizer:
 
     def set_animation(self, animation, play=True, repetitions=1):
         return self.window.send(SetAnimation(animation, play=play, repetitions=repetitions))
+
+    def get_image(self):
+        """Save an image"""
+        return self.window.get_image()
 
     def delete(self):
         return self.window.send(Delete(self.path))

@@ -24,6 +24,7 @@ setup(name="meshcat",
       "tornado >= 4.0.0",
       "pyzmq >= 17.0.0",
       "pyngrok >= 4.1.6",
+      "pillow >= 7.0.0"
     ],
     zip_safe=False,
     include_package_data=True

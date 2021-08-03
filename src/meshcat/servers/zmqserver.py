@@ -7,6 +7,7 @@ import re
 import sys
 import subprocess
 import multiprocessing
+import json
 
 import tornado.web
 import tornado.ioloop
@@ -128,7 +129,13 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.bridge.send_scene(self)
 
     def on_message(self, message):
-        pass
+        try:
+            message = json.loads(message)
+            self.bridge.send_image(message['data'])
+            return
+        except Exception as err:
+            print(err)
+            raise
 
     def on_close(self):
         self.bridge.websocket_pool.remove(self)
@@ -240,12 +247,23 @@ class ZMQWebSocketBridge(object):
         else:
             self.ioloop.call_later(0.1, self.wait_for_websockets)
 
+    def send_image(self, data):
+        import base64
+        mime, img_code = data.split(",", 1)
+        img_bytes = base64.b64decode(img_code)
+        self.zmq_stream.send(img_bytes)
+
     def handle_zmq(self, frames):
         cmd = frames[0].decode("utf-8")
         if cmd == "url":
             self.zmq_socket.send(self.web_url.encode("utf-8"))
         elif cmd == "wait":
             self.ioloop.add_callback(self.wait_for_websockets)
+        elif cmd == "capture_image":
+            if len(self.websocket_pool) > 0:
+                self.forward_to_websockets(frames)  # on_message callback should handle the pb
+            else:
+                self.ioloop.call_later(0.3, lambda: self.handle_zmq(frames))
         elif cmd in MESHCAT_COMMANDS:
             if len(frames) != 3:
                 self.zmq_socket.send(b"error: expected 3 frames")
