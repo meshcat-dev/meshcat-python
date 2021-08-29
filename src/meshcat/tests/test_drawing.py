@@ -242,7 +242,7 @@ class TestStaticHTML(TestDrawing):
 
 class TestSetProperty(VisualizerTest):
     def runTest(self):
-        self.vis["/Background"].set_property("top_color", [255, 0, 0])
+        self.vis["/Background"].set_property("top_color", [1, 0, 0])
 
 
 class TestTriangularMesh(VisualizerTest):
