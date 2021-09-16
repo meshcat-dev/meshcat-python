@@ -113,7 +113,7 @@ class Visualizer:
         """
         return self.window.wait()
 
-    def jupyter_cell(self):
+    def jupyter_cell(self, height=400):
         """
         Render the visualizer in a jupyter notebook or jupyterlab cell.
 
@@ -121,12 +121,12 @@ class Visualizer:
         cell.
         """
         return HTML("""
-            <div style="height: 400px; width: 100%; overflow-x: auto; overflow-y: hidden; resize: both">
+            <div style="height: {height}px; width: 100%; overflow-x: auto; overflow-y: hidden; resize: both">
             <iframe src="{url}" style="width: 100%; height: 100%; border: none"></iframe>
             </div>
-            """.format(url=self.url()))
+            """.format(url=self.url(), height=height))
 
-    def render_static(self):
+    def render_static(self, height=400):
         """
         Render a static snapshot of the visualizer in a jupyter notebook or
         jupyterlab cell. The resulting snapshot of the visualizer will still be an
@@ -137,10 +137,10 @@ class Visualizer:
         on a different machine or inside a container.
         """
         return HTML("""
-        <div style="height: 400px; width: 100%; overflow-x: auto; overflow-y: hidden; resize: both">
+        <div style="height: {height}px; width: 100%; overflow-x: auto; overflow-y: hidden; resize: both">
         <iframe srcdoc="{srcdoc}" style="width: 100%; height: 100%; border: none"></iframe>
         </div>
-        """.format(srcdoc=srcdoc_escape(self.static_html())))
+        """.format(srcdoc=srcdoc_escape(self.static_html()), height=height))
 
     def __getitem__(self, path):
         return Visualizer.view_into(self.window, self.path.append(path))
