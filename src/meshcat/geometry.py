@@ -286,6 +286,53 @@ class OrthographicCamera(SceneElement):
         }
         return data
 
+class PerspectiveCamera(SceneElement):
+    """
+    Checkout https://threejs.org/docs/#api/en/cameras/PerspectiveCamera
+    """
+    def __init__(self, fov, aspect, near, far, zoom):
+        """
+        fov   : Camera frustum vertical field of view, from bottom to top of view, in degrees. Default is 50.
+        aspect: Camera frustum aspect ratio, usually the canvas width / canvas height. Default is 1 (square canvas).
+        near  : Camera frustum near plane. Default is 0.1. The valid range is greater than 0 and less than the current
+                value of the far plane. Note that, unlike for the OrthographicCamera, 0 is not a valid value for a
+                PerspectiveCamera's near plane.
+        far   : Camera frustum far plane. Default is 2000.
+        zoom  : Gets or sets the zoom factor of the camera. Default is 1.
+        filmGauge: Film size used for the larger axis. Default is 35 (millimeters). This parameter does not influence
+                   the projection matrix unless .filmOffset is set to a nonzero value.
+        filmOffset: Horizontal off-center offset in the same unit as .filmGauge. Default is 0.
+        focus: Object distance used for stereoscopy and depth-of-field effects. This parameter does not influence
+               the projection matrix unless a StereoCamera is being used. Default is 10.
+        """
+        #super(PerspectiveCamera, self).__init__()
+        SceneElement.__init__(self)
+        self.aspect = aspect
+        self.far = far
+        self.filmGauge = 35
+        self.filmOffset = 0
+        self.focus = 10
+        self.fov = fov
+        self.near = near
+        self.zoom = zoom
+
+    def lower(self):
+        data = {
+            u"object": {
+                u"uuid": self.uuid,
+                u"type": u"PerspectiveCamera",
+                u"aspect": self.aspect,
+                u"far": self.far,
+                u"filmGauge": self.filmGauge,
+                u"filmOffset": self.filmOffset,
+                u"focus": self.focus,
+                u"fov": self.fov,
+                u"near": self.near,
+                u"zoom": self.zoom,
+            }
+        }
+        return data
+
 def item_size(array):
     if array.ndim == 1:
         return 1
