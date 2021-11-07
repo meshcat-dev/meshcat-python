@@ -223,9 +223,9 @@ class TestCameraAnimation(VisualizerTest):
         with animation.at_frame(v, 30) as frame_vis:
             frame_vis.set_transform(tf.translation_matrix([2, 0, 0]).dot(tf.rotation_matrix(np.pi/2, [0, 0, 1])))
         with animation.at_frame(v, 0) as frame_vis:
-            frame_vis["/Cameras/default"].set_transform(tf.translation_matrix([0, 0, -0.5]))
+            frame_vis["/Cameras/default/rotated/<object>"].set_property("zoom", "number", 1)
         with animation.at_frame(v, 30) as frame_vis:
-            frame_vis["/Cameras/default"].set_transform(tf.translation_matrix([0, 0, 0.5]))
+            frame_vis["/Cameras/default/rotated/<object>"].set_property("zoom", "number", 0.5)
         v.set_animation(animation)
 
 
