@@ -286,3 +286,17 @@ class TestOrthographicCamera(VisualizerTest):
         self.vis['/Cameras/default/rotated/<object>'].set_property(
             "position", [0, 0, 0])
         self.vis['/Grid'].set_property("visible", False)
+
+class TestPerspectiveCamera(VisualizerTest):
+    def runTest(self):
+        """
+        Test that we can set_object with a PerspectiveCamera.
+        """
+        self.vis.set_object(g.Box([0.5, 0.5, 0.5]))
+
+        camera = g.PerspectiveCamera(fov=90)
+        self.vis['/Cameras/default/rotated'].set_object(camera)
+        self.vis['/Cameras/default'].set_transform(
+            tf.translation_matrix([1, -1, 0.5]))
+        self.vis['/Cameras/default/rotated/<object>'].set_property(
+            "position", [0, 0, 0])

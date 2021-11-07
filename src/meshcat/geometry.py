@@ -288,9 +288,12 @@ class OrthographicCamera(SceneElement):
 
 class PerspectiveCamera(SceneElement):
     """
-    Checkout https://threejs.org/docs/#api/en/cameras/PerspectiveCamera
+    The PerspectiveCamera is the default camera used by the meshcat viewer. See
+    https://threejs.org/docs/#api/en/cameras/PerspectiveCamera for more
+    information.
     """
-    def __init__(self, fov, aspect, near, far, zoom):
+    def __init__(self, fov = 50, aspect = 1, near = 0.1, far = 2000,
+                 zoom = 1, filmGauge=35, filmOffset = 0, focus = 10):
         """
         fov   : Camera frustum vertical field of view, from bottom to top of view, in degrees. Default is 50.
         aspect: Camera frustum aspect ratio, usually the canvas width / canvas height. Default is 1 (square canvas).
@@ -307,14 +310,14 @@ class PerspectiveCamera(SceneElement):
         """
         #super(PerspectiveCamera, self).__init__()
         SceneElement.__init__(self)
+        self.fov = fov
         self.aspect = aspect
         self.far = far
-        self.filmGauge = 35
-        self.filmOffset = 0
-        self.focus = 10
-        self.fov = fov
         self.near = near
         self.zoom = zoom
+        self.filmGauge = filmGauge
+        self.filmOffset = filmOffset
+        self.focus = focus
 
     def lower(self):
         data = {
