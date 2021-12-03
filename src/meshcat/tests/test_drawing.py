@@ -223,9 +223,9 @@ class TestCameraAnimation(VisualizerTest):
         with animation.at_frame(v, 30) as frame_vis:
             frame_vis.set_transform(tf.translation_matrix([2, 0, 0]).dot(tf.rotation_matrix(np.pi/2, [0, 0, 1])))
         with animation.at_frame(v, 0) as frame_vis:
-            frame_vis["/Cameras/default"].set_transform(tf.translation_matrix([0, 0, -0.5]))
+            frame_vis["/Cameras/default/rotated/<object>"].set_property("zoom", "number", 1)
         with animation.at_frame(v, 30) as frame_vis:
-            frame_vis["/Cameras/default"].set_transform(tf.translation_matrix([0, 0, 0.5]))
+            frame_vis["/Cameras/default/rotated/<object>"].set_property("zoom", "number", 0.5)
         v.set_animation(animation)
 
 
@@ -286,3 +286,17 @@ class TestOrthographicCamera(VisualizerTest):
         self.vis['/Cameras/default/rotated/<object>'].set_property(
             "position", [0, 0, 0])
         self.vis['/Grid'].set_property("visible", False)
+
+class TestPerspectiveCamera(VisualizerTest):
+    def runTest(self):
+        """
+        Test that we can set_object with a PerspectiveCamera.
+        """
+        self.vis.set_object(g.Box([0.5, 0.5, 0.5]))
+
+        camera = g.PerspectiveCamera(fov=90)
+        self.vis['/Cameras/default/rotated'].set_object(camera)
+        self.vis['/Cameras/default'].set_transform(
+            tf.translation_matrix([1, -1, 0.5]))
+        self.vis['/Cameras/default/rotated/<object>'].set_property(
+            "position", [0, 0, 0])
