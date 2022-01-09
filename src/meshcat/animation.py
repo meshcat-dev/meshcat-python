@@ -147,6 +147,7 @@ def convert_frames_to_video(tar_file_path, output_path="output.mp4", framerate=6
                 "-i", r"%07d.png",
                 "-vcodec", "libx264",
                 "-preset", "slow",
+                "-pix_fmt", "yuv420p",
                 "-crf", "18"]
         if overwrite:
             args.append("-y")
@@ -158,7 +159,7 @@ def convert_frames_to_video(tar_file_path, output_path="output.mp4", framerate=6
 Could not call `ffmpeg` to convert your frames into a video.
 If you want to convert the frames manually, you can extract the
 .tar archive into a directory, cd to that directory, and run:
-ffmpeg -r 60 -i %07d.png \\\n\t -vcodec libx264 \\\n\t -preset slow \\\n\t -crf 18 \\\n\t output.mp4
+ffmpeg -r 60 -i %07d.png -vcodec libx264 -preset slow -pix_fmt yuv420p -crf 18 output.mp4
                 """)
             raise
     print("Saved output as {:s}".format(output_path))
