@@ -8,7 +8,7 @@ from IPython.display import HTML
 
 
 from .path import Path
-from .commands import SetObject, SetTransform, Delete, SetProperty, SetAnimation, CaptureImage
+from .commands import SetObject, SetTransform, Delete, SetProperty, SetAnimation, CaptureImage, SetCamTarget
 from .geometry import MeshPhongMaterial
 from .servers.zmqserver import start_zmq_server_as_subprocess
 
@@ -68,8 +68,8 @@ class ViewerWindow:
         # we receive the HTML as utf-8-encoded, so decode here
         return self.zmq_socket.recv().decode('utf-8')
 
-    def get_image(self):
-        cmd_data = CaptureImage().lower()
+    def get_image(self, w, h):
+        cmd_data = CaptureImage(w, h).lower()
         self.zmq_socket.send_multipart([
             cmd_data["type"].encode("utf-8"),
             "".encode("utf-8"),
@@ -157,9 +157,13 @@ class Visualizer:
     def set_animation(self, animation, play=True, repetitions=1):
         return self.window.send(SetAnimation(animation, play=play, repetitions=repetitions))
 
-    def get_image(self):
+    def set_cam_target(self, value):
+        """Set camera target."""
+        return self.window.send(SetCamTarget(value))
+
+    def get_image(self, w=None, h=None):
         """Save an image"""
-        return self.window.get_image()
+        return self.window.get_image(w, h)
 
     def delete(self):
         return self.window.send(Delete(self.path))

@@ -44,12 +44,36 @@ class SetTransform:
             u"matrix": list(self.matrix.T.flatten())
         }
 
-class CaptureImage:
+
+class SetCamTarget:
+    """Set the camera target point."""
+    __slots__ = ["value"]
+    def __init__(self, pos):
+        self.value = pos
 
     def lower(self):
         return {
+            u"type": "set_target",
+            u"path": "",
+            u"value": list(self.value)
+        }
+
+
+class CaptureImage:
+
+    def __init__(self, xres=None, yres=None):
+        self.xres = xres
+        self.yres = yres
+
+    def lower(self):
+        data = {
             u"type": u"capture_image"
         }
+        if self.xres:
+            data[u"xres"] = self.xres
+        if self.yres:
+            data[u"yres"] = self.yres
+        return data
 
 
 class Delete:
