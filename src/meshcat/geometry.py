@@ -80,6 +80,26 @@ class Ellipsoid(Sphere):
         return np.diag(np.hstack((self.radii, 1.0)))
 
 
+class Plane(Geometry):
+
+    def __init__(self, width=1, height=1, widthSegments=1, heightSegments=1):
+        super(Plane, self).__init__()
+        self.width = width
+        self.height = height
+        self.widthSegments = widthSegments
+        self.heightSegments = heightSegments
+
+    def lower(self, object_data):
+        return {
+            u"uuid": self.uuid,
+            u"type": u"PlaneGeometry",
+            u"width": self.width,
+            u"height": self.height,
+            u"widthSegments": self.widthSegments,
+            u"heightSegments": self.heightSegments,
+        }
+
+
 """
 A cylinder of the given height and radius. By Three.js convention, the axis of
 rotational symmetry is aligned with the y-axis.
@@ -192,6 +212,26 @@ class PngImage(Image):
         return {
             u"uuid": self.uuid,
             u"url": str("data:image/png;base64," + base64.b64encode(self.data).decode('ascii'))
+        }
+
+
+class TextTexture(Texture):
+    def __init__(self, text, font_size=100, font_face='sans-serif',
+                 width=200, height=100, position=[10, 10]):
+        super(TextTexture, self).__init__()
+        self.text = text
+        # font_size will be passed to the JS side as is; however if the
+        # text width exceeds canvas width, font_size will be reduced.
+        self.font_size = font_size
+        self.font_face = font_face
+
+    def lower(self, object_data):
+        return {
+            u"uuid": self.uuid,
+            u"type": u"_text",
+            u"text": unicode(self.text),
+            u"font_size": self.font_size,
+            u"font_face": self.font_face,
         }
 
 
@@ -550,6 +590,13 @@ def PointCloud(position, color, **kwargs):
         PointsMaterial(**kwargs)
     )
 
+
+def SceneText(text, width=10, height=10, **kwargs):
+    return Mesh(
+        Plane(width=width,height=height),
+        MeshPhongMaterial(map=TextTexture(text,**kwargs),transparent=True,
+            needsUpdate=True)
+        )
 
 class Line(Object):
     _type = u"Line"
