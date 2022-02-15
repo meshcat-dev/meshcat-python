@@ -229,7 +229,7 @@ class TextTexture(Texture):
         return {
             u"uuid": self.uuid,
             u"type": u"_text",
-            u"text": unicode(self.text),
+            u"text": self.text,
             u"font_size": self.font_size,
             u"font_face": self.font_face,
         }
