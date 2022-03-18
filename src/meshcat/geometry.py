@@ -450,14 +450,16 @@ class ObjMeshGeometry(MeshGeometry):
 class DaeMeshFileObject(MeshFileObject):
     def __init__(self, contents):
         super(DaeMeshFileObject, self).__init__(contents, u"dae", {}) #these super calls are not typically used (we don't instance these things) and seem to be broken on other types
-    
+        
     @staticmethod
     def from_file(fname, verbose=False):
+        """
+        Currently limited to loading image textures from png files
+        """
         with open(fname, "r") as f:
             dae_contents = f.read()
         # --- we need to parse the DAE to build resources---
         dae_tree = Et.parse(fname)
-
 
         img_resources = {}
         # --- this is against a Blender collada file ---
@@ -480,7 +482,10 @@ class DaeMeshFileObject(MeshFileObject):
             with open(img_path, "rb") as imf:
                 imdata = base64.b64encode(imf.read())
             imstr = imdata.decode('utf-8')
-            imuri = "data:image/png;base64,{}".format(imstr)
+            if img_name.split('.')[-1] in ['jpeg', 'jpg']:
+                imuri = "data:image/jpeg;base64,{}".format(imstr) #is it as simple here as switching png/bmp/jpg etc on the file extension?
+            elif img_name.endswith('.png'):
+                imuri = "data:image/png;base64,{}".format(imstr)
             img_resources[img_name] = imuri
 
         return MeshFileObject(dae_contents, u"dae", img_resources)
