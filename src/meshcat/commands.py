@@ -1,6 +1,5 @@
-from .geometry import Geometry, Object, Mesh, MeshPhongMaterial, OrthographicCamera, PerspectiveCamera, PointsMaterial, Points
+from .geometry import Geometry, Object, Mesh, MeshPhongMaterial, OrthographicCamera, PerspectiveCamera, PointsMaterial, Points, MeshFileObject
 from .path import Path
-
 
 class SetObject:
     __slots__ = ["object", "path"]
@@ -8,6 +7,10 @@ class SetObject:
         if isinstance(geometry_or_object, Object):
             if material is not None:
                 raise(ValueError("Please supply either an Object OR a Geometry and a Material"))
+            self.object = geometry_or_object
+        elif isinstance(geometry_or_object, MeshFileObject):
+            if material is not None:
+                raise(ValueError("MeshFileObject does not support setting a material, it is for reading materials/textures from files."))
             self.object = geometry_or_object
         elif isinstance(geometry_or_object, (OrthographicCamera, PerspectiveCamera)):
             self.object = geometry_or_object
