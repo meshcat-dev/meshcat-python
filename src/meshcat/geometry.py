@@ -454,7 +454,7 @@ class DaeMeshFileObject(MeshFileObject):
     @staticmethod
     def from_file(fname, verbose=False):
         """
-        Currently limited to loading image textures from png files
+        Currently limited to loading image textures from jpeg or png files, uses file extension
         """
         with open(fname, "r") as f:
             dae_contents = f.read()
@@ -462,7 +462,7 @@ class DaeMeshFileObject(MeshFileObject):
         dae_tree = Et.parse(fname)
 
         img_resources = {}
-        # --- this is against a Blender collada file ---
+        # --- this is against a Blender collada file, maybe need a more elegant way of parsing and handling XML namespaces  ---
         img_lib_element = dae_tree.find('{http://www.collada.org/2005/11/COLLADASchema}library_images')
         
         if img_lib_element:

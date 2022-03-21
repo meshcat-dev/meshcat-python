@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.92.0 commit date:2021-02-24, commit time:16:25, hash:02948a2cab44</authoring_tool>
     </contributor>
-    <created>2022-03-18T19:23:12</created>
-    <modified>2022-03-18T19:23:12</modified>
+    <created>2022-03-21T09:13:52</created>
+    <modified>2022-03-21T09:13:52</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -78,14 +78,14 @@
   <library_effects>
     <effect id="Default_OBJ-effect">
       <profile_COMMON>
-        <newparam sid="HeadTextureMultisense_png-surface">
+        <newparam sid="HeadTextureMultisenseBlue_png-surface">
           <surface type="2D">
-            <init_from>HeadTextureMultisense_png</init_from>
+            <init_from>HeadTextureMultisenseBlue_png</init_from>
           </surface>
         </newparam>
-        <newparam sid="HeadTextureMultisense_png-sampler">
+        <newparam sid="HeadTextureMultisenseBlue_png-sampler">
           <sampler2D>
-            <source>HeadTextureMultisense_png-surface</source>
+            <source>HeadTextureMultisenseBlue_png-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -94,7 +94,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <diffuse>
-              <texture texture="HeadTextureMultisense_png-sampler" texcoord="UVMap"/>
+              <texture texture="HeadTextureMultisenseBlue_png-sampler" texcoord="UVMap"/>
             </diffuse>
             <index_of_refraction>
               <float sid="ior">1.45</float>
@@ -105,8 +105,8 @@
     </effect>
   </library_effects>
   <library_images>
-    <image id="HeadTextureMultisense_png" name="HeadTextureMultisense_png">
-      <init_from>HeadTextureMultisense.png</init_from>
+    <image id="HeadTextureMultisenseBlue_png" name="HeadTextureMultisenseBlue_png">
+      <init_from>HeadTextureMultisenseBlue.png</init_from>
     </image>
   </library_images>
   <library_materials>
