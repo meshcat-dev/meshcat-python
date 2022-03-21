@@ -3,6 +3,9 @@ import uuid
 from io import StringIO, BytesIO
 import umsgpack
 import numpy as np
+import xml.etree.ElementTree as Et
+import base64
+import os
 
 from . import transformations as tf
 
@@ -16,7 +19,6 @@ class ReferenceSceneElement(SceneElement):
     def lower_in_object(self, object_data):
         object_data.setdefault(self.field, []).append(self.lower(object_data))
         return self.uuid
-
 
 class Geometry(ReferenceSceneElement):
     field = "geometries"
@@ -250,7 +252,7 @@ class Object(SceneElement):
                 u"matrix": list(self.geometry.intrinsic_transform().flatten())
             }
         }
-        self.geometry.lower_in_object(data)
+        self.geometry.lower_in_object(data) #this puts the actual data into geometries list, hmm
         self.material.lower_in_object(data)
         return data
 
@@ -380,6 +382,43 @@ def data_from_stream(stream):
     return data
 
 
+#we can't make a MeshFileObject that inherits from Object because we need data and resources and no need for material, geom uuids
+class MeshFileObject(SceneElement):
+    """
+    Proposed class to introduce _meshfile_object that loads colors, textures, etc. from file
+
+    I don't like the naming here because it sounds like it should inherit from Object but 
+    it's more sitting next to Object at the same level.
+
+    It only gets a UUID from SceneElement, doesn't have a lower_in_object() method but 
+    doesn't seem to need it (since data, resources are actually the contents not a UUID reference)
+    """
+    def __init__(self, contents, mesh_format, image_resources={}):
+        super(MeshFileObject, self).__init__()
+        self.contents = contents
+        self.mesh_format = mesh_format
+        self.image_resources = image_resources
+
+    def lower(self):
+        data = {
+            u"metadata": {
+                u"version": 4.5,
+                u"type": u"Object",
+            },
+            u"geometries": [],
+            u"materials": [],
+            u"object": {
+                u"uuid": self.uuid,
+                u"type": u"_meshfile_object",
+                u"format": self.mesh_format,
+                u"data": self.contents,
+                u"resources": self.image_resources
+                #u'matrix': TODO
+            }
+        }
+        # don't need lower_in_object() I don't think
+        return data
+
 class MeshGeometry(Geometry):
     def __init__(self, contents, mesh_format):
         super(MeshGeometry, self).__init__()
@@ -408,6 +447,48 @@ class ObjMeshGeometry(MeshGeometry):
     def from_stream(f):
         return MeshGeometry(data_from_stream(f), u"obj")
 
+class DaeMeshFileObject(MeshFileObject):
+    def __init__(self, contents):
+        super(DaeMeshFileObject, self).__init__(contents, u"dae", {}) #these super calls are not typically used (we don't instance these things) and seem to be broken on other types
+        
+    @staticmethod
+    def from_file(fname, verbose=False):
+        """
+        Currently limited to loading image textures from jpeg or png files, uses file extension
+        """
+        with open(fname, "r") as f:
+            dae_contents = f.read()
+        # --- we need to parse the DAE to build resources---
+        dae_tree = Et.parse(fname)
+
+        img_resources = {}
+        # --- this is against a Blender collada file, maybe need a more elegant way of parsing and handling XML namespaces  ---
+        img_lib_element = dae_tree.find('{http://www.collada.org/2005/11/COLLADASchema}library_images')
+        
+        if img_lib_element:
+            img_resource_names = [e.text for e in img_lib_element.iter() if e.tag.count('init_from')]
+            if verbose:
+                print("Found image resource names:", img_resource_names)
+        else:
+            img_resource_names = []
+        
+        img_dir =  os.path.dirname(os.path.abspath(fname))
+        if verbose: 
+            print("Seeking images in", img_dir)
+        for img_name in img_resource_names:
+            img_path = os.path.join(img_dir, img_name)
+            if not os.path.isfile(img_path):
+                raise UserWarning("DaeMeshFileObject.from_file() could  not find image {} in Collada file library_images. Make sure they all exist in the same directory as the DAE file".format(img_name) )
+            with open(img_path, "rb") as imf:
+                imdata = base64.b64encode(imf.read())
+            imstr = imdata.decode('utf-8')
+            if img_name.split('.')[-1] in ['jpeg', 'jpg']:
+                imuri = "data:image/jpeg;base64,{}".format(imstr) #is it as simple here as switching png/bmp/jpg etc on the file extension?
+            elif img_name.endswith('.png'):
+                imuri = "data:image/png;base64,{}".format(imstr)
+            img_resources[img_name] = imuri
+
+        return MeshFileObject(dae_contents, u"dae", img_resources)
 
 class DaeMeshGeometry(MeshGeometry):
     def __init__(self, contents):
