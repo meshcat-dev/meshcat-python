@@ -216,8 +216,7 @@ class PngImage(Image):
 
 
 class TextTexture(Texture):
-    def __init__(self, text, font_size=100, font_face='sans-serif',
-                 width=200, height=100, position=[10, 10]):
+    def __init__(self, text, font_size=100, font_face='sans-serif'):
         super(TextTexture, self).__init__()
         self.text = text
         # font_size will be passed to the JS side as is; however if the
