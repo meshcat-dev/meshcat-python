@@ -1,4 +1,4 @@
-from .geometry import Geometry, Object, Mesh, MeshPhongMaterial, OrthographicCamera, PerspectiveCamera, PointsMaterial, Points
+from .geometry import Geometry, Object, Mesh, MeshPhongMaterial, OrthographicCamera, PerspectiveCamera, PointsMaterial, Points, TextTexture
 from .path import Path
 
 
