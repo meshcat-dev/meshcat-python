@@ -23,10 +23,10 @@ class VisualizerTest(unittest.TestCase):
             port = self.vis.url().split(":")[-1].split("/")[0]
             self.dummy_proc = subprocess.Popen([sys.executable, "-m", "meshcat.tests.dummy_websocket_client", str(port)])
         else:
-            #self.vis.open()
+            self.vis.open()
             self.dummy_proc = None
 
-        #self.vis.wait()
+        self.vis.wait()
 
     def tearDown(self):
         if self.dummy_proc is not None:
@@ -304,9 +304,6 @@ class TestUUIDCloning(VisualizerTest):
         v2 = v["duplicate"]
         v2.set_transform(tf.translation_matrix([2., 0., 0.]))
         v2.set_object(geom_2, mat_2)
-
-        import time
-        time.sleep(1000)
         
 class TestOrthographicCamera(VisualizerTest):
     def runTest(self):
