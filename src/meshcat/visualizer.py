@@ -161,6 +161,13 @@ class Visualizer:
         """Set camera target."""
         return self.window.send(SetCamTarget(value))
 
+    def set_cam_pos(self, value):
+        """Set camera position (in right-handed coordinates (x,y,z))."""
+        path = "/Cameras/default/rotated/<object>"
+        v = list(value)
+        v[1], v[2] = v[2], -v[1]  # convert to left-handed (x,z,-y)
+        return self[path].set_property("position", value)
+
     def get_image(self, w=None, h=None):
         """Save an image"""
         return self.window.get_image(w, h)
