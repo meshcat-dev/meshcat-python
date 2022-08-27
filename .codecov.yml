@@ -1,3 +1,0 @@
-ignore:
-  - "src/meshcat/transformations.py"
-  - "setup.py"
