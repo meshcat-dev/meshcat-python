@@ -268,6 +268,9 @@ class ImageTexture(Texture):
 
 
 class Object(SceneElement):
+    sent_geom_uuids = set()
+    sent_material_uuids = set()
+
     def __init__(self, geometry, material=MeshPhongMaterial()):
         super(Object, self).__init__()
         self.geometry = geometry
@@ -289,8 +292,15 @@ class Object(SceneElement):
                 u"matrix": list(self.geometry.intrinsic_transform().flatten())
             }
         }
-        self.geometry.lower_in_object(data)
-        self.material.lower_in_object(data)
+        # If this geometry or material has been previously sent,
+        # then we don't need to populate these fields; the server
+        # will load the matching geometry or material from its cache.
+        if self.geometry.uuid not in self.sent_geom_uuids:
+            self.sent_geom_uuids.add(self.geometry.uuid)
+            self.geometry.lower_in_object(data)
+        if self.material.uuid not in self.sent_material_uuids:
+            self.sent_material_uuids.add(self.material.uuid)
+            self.material.lower_in_object(data)
         return data
 
 

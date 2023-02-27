@@ -271,6 +271,40 @@ class TestTriangularMesh(VisualizerTest):
         v.set_object(g.TriangularMeshGeometry(vertices, faces, colors), g.MeshLambertMaterial(vertexColors=True, wireframe=True))
 
 
+class TestUUIDCloning(VisualizerTest):
+    def runTest(self):
+        """
+        Test that geometry with identical UUIDs are handled correctly.
+        """
+        v = self.vis["triangular_mesh"]
+        v.set_transform(tf.rotation_matrix(np.pi/2, [0., 0, 1]))
+        vertices = np.array([
+            [0, 0, 0],
+            [1, 0, 0],
+            [1, 0, 1],
+            [0, 0, 1]
+        ])
+        faces = np.array([
+            [0, 1, 2],
+            [3, 0, 2]
+        ])
+        geom = g.TriangularMeshGeometry(vertices, faces)
+        mat = g.MeshLambertMaterial(color=0xeedd22, wireframe=True)
+        geom.uuid = 1234
+        mat.uuid = 5678
+        v.set_object(geom, mat)
+
+        # This should be drawn as a duplicate of the first geometry
+        # at and offset; if nothing appears, or the material is different,
+        # the UUID lookup did not succeed.
+        geom_2 = g.TriangularMeshGeometry(np.empty((0, 3)), np.empty((0, 3)))
+        mat_2 = g.MeshLambertMaterial(color=0x000000, wireframe=False)
+        geom_2.uuid = 1234
+        mat_2.uuid = 5678
+        v2 = v["duplicate"]
+        v2.set_transform(tf.translation_matrix([2., 0., 0.]))
+        v2.set_object(geom_2, mat_2)
+        
 class TestOrthographicCamera(VisualizerTest):
     def runTest(self):
         """
