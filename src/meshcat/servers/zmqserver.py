@@ -123,6 +123,9 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.bridge = kwargs.pop("bridge")
         super(WebSocketHandler, self).__init__(*args, **kwargs)
 
+    def check_origin(self, origin):
+        return True
+
     def open(self):
         self.bridge.websocket_pool.add(self)
         print("opened:", self, file=sys.stderr)
