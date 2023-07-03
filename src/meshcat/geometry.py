@@ -294,6 +294,41 @@ class Object(SceneElement):
         return data
 
 
+class BillboardObject(Object):
+    def __init__(self, text, base_width, size, global_scale=1):
+        """
+
+        :param text: Text to put on the billboard
+        :param base_width: Width of the billboard in pixels
+        :param size: Height of the text in pixels
+        :param global_scale: Scale factor to apply to the billboard (0.01 gets it to roughly meter size)
+        """
+        super(BillboardObject, self).__init__([])
+        self.text = text
+        self.base_width = base_width
+        self.size = size
+        self.global_scale = global_scale
+
+    def lower(self):
+        return {
+            u"metadata": {
+                u"version": 4.5,
+                u"type": u"_billboard",
+            },
+            u"geometries": [],
+            u"materials": [],
+            u"object": {
+                u"uuid": self.uuid,
+                u"type": u"_billboard",
+                u"text": self.text,
+                u"base_width": self.base_width,
+                u"size": self.size,
+                u"global_scale": self.global_scale,
+                u"matrix": np.eye(4).flatten().tolist()
+            }
+        }
+
+
 class Mesh(Object):
     _type = u"Mesh"
 
