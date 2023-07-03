@@ -84,7 +84,7 @@ class ViewerWindow:
         self.zmq_socket.close()
         self.context.destroy()
         if self.server_proc is not None:
-            self.server_proc.send_signal(signal.SIGINT)
+            self.server_proc.kill()
             self.server_proc.wait()
 
 def srcdoc_escape(x):
