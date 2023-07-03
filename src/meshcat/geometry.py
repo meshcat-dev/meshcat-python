@@ -295,19 +295,23 @@ class Object(SceneElement):
 
 
 class BillboardObject(Object):
-    def __init__(self, text, base_width, size, global_scale=1):
+    def __init__(self, text, base_width, size, global_scale=1, text_color='white', background_color='blue'):
         """
 
         :param text: Text to put on the billboard
         :param base_width: Width of the billboard in pixels
         :param size: Height of the text in pixels
         :param global_scale: Scale factor to apply to the billboard (0.01 gets it to roughly meter size)
+        :param text_color: Color name for the text
+        :param background_color: Color name for the background
         """
         super(BillboardObject, self).__init__([])
         self.text = text
         self.base_width = base_width
         self.size = size
         self.global_scale = global_scale
+        self.text_color = text_color
+        self.background_color = background_color
 
     def lower(self):
         return {
@@ -324,7 +328,9 @@ class BillboardObject(Object):
                 u"base_width": self.base_width,
                 u"size": self.size,
                 u"global_scale": self.global_scale,
-                u"matrix": np.eye(4).flatten().tolist()
+                u"matrix": np.eye(4).flatten().tolist(),
+                u"text_color": self.text_color,
+                u"background_color": self.background_color,
             }
         }
 
