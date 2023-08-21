@@ -1,10 +1,10 @@
 meshcat-python: Python Bindings to the MeshCat WebGL viewer
 ===========================================================
 
-.. image:: https://github.com/rdeits/meshcat-python/workflows/CI/badge.svg?branch=master
-    :target: https://github.com/rdeits/meshcat-python/actions?query=workflow%3ACI
-.. image:: https://codecov.io/gh/rdeits/meshcat-python/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/rdeits/meshcat-python
+.. image:: https://github.com/meshcat-dev/meshcat-python/workflows/CI/badge.svg?branch=master
+    :target: https://github.com/meshcat-dev/meshcat-python/actions?query=workflow%3ACI
+.. image:: https://codecov.io/gh/meshcat-dev/meshcat-python/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/meshcat-dev/meshcat-python
 
 
 MeshCat_ is a remotely-controllable 3D viewer, built on top of three.js_. The viewer contains a tree of objects and transformations (i.e. a scene graph) and allows those objects and transformations to be added and manipulated with simple commands. This makes it easy to create 3D visualizations of geometries, mechanisms, and robots. 
@@ -17,7 +17,7 @@ The MeshCat architecture is based on the model used by Jupyter_:
 
 .. _ZeroMQ: http://zguide.zeromq.org/
 .. _Jupyter: http://jupyter.org/
-.. _MeshCat: https://github.com/rdeits/meshcat
+.. _MeshCat: https://github.com/meshcat-dev/meshcat
 .. _three.js: https://threejs.org/
 
 Installation
@@ -35,7 +35,7 @@ From source:
 
 ::
 
-    git clone https://github.com/rdeits/meshcat-python
+    git clone https://github.com/meshcat-dev/meshcat-python
     git submodule update --init --recursive
     cd meshcat-python
     python setup.py install
