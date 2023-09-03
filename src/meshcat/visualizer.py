@@ -1,3 +1,4 @@
+import signal
 import webbrowser
 import umsgpack
 import numpy as np
@@ -79,6 +80,12 @@ class ViewerWindow:
         img = Image.open(io.BytesIO(img_bytes))
         return img
 
+    def close(self):
+        self.zmq_socket.close()
+        self.context.destroy()
+        if self.server_proc is not None:
+            self.server_proc.kill()
+            self.server_proc.wait()
 
 def srcdoc_escape(x):
     return x.replace("&", "&amp;").replace('"', "&quot;")

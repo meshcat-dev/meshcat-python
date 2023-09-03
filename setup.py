@@ -2,7 +2,7 @@ import sys
 from setuptools import setup, find_packages
 
 setup(name="meshcat",
-    version="0.3.2",
+    version="0.3.2a",
     description="WebGL-based visualizer for 3D geometries and scenes",
     url="https://github.com/rdeits/meshcat-python",
     download_url="https://github.com/rdeits/meshcat-python/archive/v0.3.2.tar.gz",
