@@ -4,6 +4,7 @@ import atexit
 import base64
 import os
 import re
+import signal
 import sys
 import subprocess
 import multiprocessing
@@ -406,10 +407,21 @@ is very useful if you would like to make your meshcat server public.""")
     if results.open:
         webbrowser.open(bridge.web_url, new=2)
 
+    def cleanup():
+        bridge.zmq_socket.close()
+        bridge.context.destroy()
+
+    # Make sure also kill results in socket being closed otherwise ZMQbg/Reaper and IO processes might stay open
+    atexit.register(cleanup)
+    signal.signal(signal.SIGTERM, cleanup)
+    signal.signal(signal.SIGINT, cleanup)
+
     try:
         bridge.run()
     except KeyboardInterrupt:
         pass
+    finally:
+        cleanup()
 
 if __name__ == '__main__':
     main()
