@@ -261,7 +261,8 @@ class ImageTexture(Texture):
             u"uuid": self.uuid,
             u"wrap": self.wrap,
             u"repeat": self.repeat,
-            u"image": self.image.lower_in_object(object_data)
+            u"image": self.image.lower_in_object(object_data),
+            u"colorSpace": "srgb"
         }
         data.update(self.properties)
         return data
